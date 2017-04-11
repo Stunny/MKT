@@ -14,6 +14,11 @@ public class Main {
 
         Map m = new Map("map.txt");
         MultiKeyTreasureGUI gui = new MultiKeyTreasureGUI(500, 500, "MKT", m.getRawMap());
+        System.out.println(m.getINIT_COLUMN()+","+m.getINIT_ROW());
+
+        gui.setPathLength(0);
+        gui.setKeysCollected(0);
+
 
         Solver solver = new MKTBacktracking(m, gui);
         Configuration x = new Configuration(m.rows()*m.columns());

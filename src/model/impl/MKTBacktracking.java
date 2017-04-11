@@ -60,7 +60,7 @@ public class MKTBacktracking implements Solver {
         preparaRecorridoNivel(x, k);
 
         while(haySucesor(x, k)){
-            try {Thread.sleep(500);} catch (InterruptedException e) {}
+            try {Thread.sleep(100);} catch (InterruptedException e) {}
             siguienteHermano(x, k);
             if(buena(x, k)){
 
@@ -115,6 +115,14 @@ public class MKTBacktracking implements Solver {
     // posible
     private void preparaRecorridoNivel(Configuration x, int k){
         x.setMove(k, -1);
+
+        Casilla actual = new Casilla(map.getINIT_ROW(), map.getINIT_COLUMN());
+        for(int i = 0; x.getMove(i) != -1; i++){
+            Casilla.avanza(actual, x.getMove(i));
+        }
+
+        map.getCasilla(actual.getRow(), actual.getColumn()).step();
+
     }
 
     // Comprueba si quedan posibilidades hermanas por explorar el el actual nivel de busqueda
@@ -148,25 +156,27 @@ public class MKTBacktracking implements Solver {
 
     // Comprueba si al configuracion actual es una parte correcta de una posible solucion
     private boolean buena(Configuration x, int k) {
-
+        int actualMove;
         int llavesActuales = 0;
         Casilla casillaActual = new Casilla(map.getINIT_ROW(), map.getINIT_COLUMN());
 
-        for (int i = 0; i < k; i++) {
-            Casilla.avanza(casillaActual, x.getMove(i));
+        for (int i = 0; i <= k; i++) {
+            actualMove = x.getMove(i);
+            Casilla.avanza(casillaActual, actualMove);
 
+            // Comprobamos que no se sale
             if (casillaActual.getColumn() < 0 || casillaActual.getColumn() > map.columns() - 1
                     || casillaActual.getRow() < 0 || casillaActual.getRow() > map.rows() - 1) {
                 return false;
             }
 
+            // Comprobamos que no es una pared
             if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof WallCasilla)
                 return false;
 
-            map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).step();
-
+            // Comrpobamos que la casilla a la que se pretende ir está pisada anteriormente
             if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getSteps() > 1) {
-                map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).unStep();
+                //map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).unStep();
                 return false;
             }
 
@@ -181,26 +191,27 @@ public class MKTBacktracking implements Solver {
             return false;
         }
 
-        gui.addToPath(casillaActual.getRow(), casillaActual.getColumn());
         return true;
     }
 
     // Comprueba si al configuracion actual es una parte correcta de una posible solucion utilizando el marcage
     // establecido, y, por tanto, reduciendo el coste de la funcion
-    private boolean buena(Configuration x, int k, Mark m){
+    private boolean buena(Configuration x, int k, Mark m) {
 
         Casilla casillaActual = m.getCasillaActual();
 
-        if(casillaActual.getColumn() < 0 || casillaActual.getColumn() > map.columns()-1
-                ||casillaActual.getRow() < 0 || casillaActual.getRow() > map.rows()-1){
+        if (casillaActual.getColumn() < 0 || casillaActual.getColumn() > map.columns() - 1
+                || casillaActual.getRow() < 0 || casillaActual.getRow() > map.rows() - 1) {
             return false;
         }
 
-        if(map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof WallCasilla)
+        if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof WallCasilla)
             return false;
 
-        if(map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getSteps() > 1)
+        if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getSteps() > 1){
+            map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).unStep();
             return false;
+        }
 
         if(map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof TreasureCasilla)
             return m.getCurrentKeys() >= map.getReqKeys();
