@@ -173,7 +173,7 @@ public class MKTBacktracking implements Solver {
             // Comprobamos que no es una pared
             if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof WallCasilla)
                 return false;
-
+            System.out.println("steps on level " +Integer.toString(k)+" position "+Integer.toString(i)+": "+(map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getSteps()));
             // Comrpobamos que la casilla a la que se pretende ir está pisada anteriormente
             if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getSteps() > 1) {
                 //map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).unStep();
