@@ -18,7 +18,10 @@ public class Main {
         Solver solver = new MKTBacktracking(m, gui);
         Configuration x = new Configuration(m.rows()*m.columns());
         Mark mark = new Mark(m);
-        solver.improvedSolve(x, 0, mark);
+
+        gui.startChronometer();
+        solver.solve(x, 0);
+        gui.stopChronometer();
     }
 
 }

@@ -25,19 +25,23 @@ public class Mark {
         casillaActual = new Casilla(m.getINIT_ROW(), m.getINIT_COLUMN());
     }
 
-    public void mark(Configuration x, int k){
+    public void mark(Configuration x, int k) {
         Casilla.avanza(casillaActual, x.getMove(k));
         pathLength++;
-        currentKeys += m.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getqKeys();
-        m.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).step();
+
+        if (casillaActual.getRow() > 0 && casillaActual.getColumn() > 0){
+            currentKeys += m.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getqKeys();
+            m.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).step();
+        }
     }
 
-    public void unmark(Configuration x, int k){
-        pathLength--;
-        currentKeys -= m.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getqKeys();
-        m.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).unStep();
+    public void unmark(Configuration x, int k) {
+        if(casillaActual.getRow() > 0 && casillaActual.getColumn() > 0){
+            currentKeys -= m.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getqKeys();
+            m.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).unStep();
+        }
         Casilla.retrocede(casillaActual, x.getMove(k));
-
+        pathLength--;
     }
 
     public Casilla getCasillaActual(){return casillaActual;}

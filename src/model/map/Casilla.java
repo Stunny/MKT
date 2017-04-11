@@ -21,6 +21,7 @@ public class Casilla {
         this.qKeys = qKeys;
         this.row = row;
         this.column = column;
+        steps = 0;
     }
 
     /**
@@ -31,6 +32,7 @@ public class Casilla {
     public Casilla(int row, int column) {
         this.row = row;
         this.column = column;
+        steps = 0;
     }
 
     /**

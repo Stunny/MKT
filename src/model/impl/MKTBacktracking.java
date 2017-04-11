@@ -53,22 +53,28 @@ public class MKTBacktracking implements Solver {
     /**
      * Executes the search for the puzzle solutions.
      */
-    public void solve(Configuration x, int k) {
+    public void solve(Configuration y, int k) {
+
+        Configuration x = new Configuration(y);
 
         preparaRecorridoNivel(x, k);
 
         while(haySucesor(x, k)){
-
+            try {Thread.sleep(500);} catch (InterruptedException e) {}
             siguienteHermano(x, k);
             if(buena(x, k)){
 
                 if(solucion(x, k)){
                     tratarSolucion(x);
                 }else{
+                    addToPath(x, k);
                     solve(x, k+1);
+                    removeFromPath(x, k);
                 }
 
             }
+
+
         }
 
     }
@@ -93,7 +99,9 @@ public class MKTBacktracking implements Solver {
                     if(solucion(x, k, m)){
                         tratarSolucion(x, m);
                     }else{
+                        addToPath(m);
                         improvedSolve(x, k+1, m);
+                        removeFromPath(m);
                     }
                 }
             }
@@ -144,7 +152,7 @@ public class MKTBacktracking implements Solver {
         int llavesActuales = 0;
         Casilla casillaActual = new Casilla(map.getINIT_ROW(), map.getINIT_COLUMN());
 
-        for (int i = 0; i <= k; i++) {
+        for (int i = 0; i < k; i++) {
             Casilla.avanza(casillaActual, x.getMove(i));
 
             if (casillaActual.getColumn() < 0 || casillaActual.getColumn() > map.columns() - 1
@@ -229,5 +237,37 @@ public class MKTBacktracking implements Solver {
         xMillor = new Configuration(x);
         vMillor.setKeys(m.getCurrentKeys());
         vMillor.setPathLength(m.getPathLength());
+    }
+
+    //
+    private void addToPath(Configuration x, int k){
+        Casilla casillaActual = new Casilla(map.getINIT_ROW(), map.getINIT_COLUMN());
+
+        for(int i = 0; i <= k; i++){
+            Casilla.avanza(casillaActual, x.getMove(i));
+        }
+
+        gui.addToPath(casillaActual.getRow(), casillaActual.getColumn());
+    }
+
+    //
+    private void addToPath(Mark m){
+        gui.addToPath(m.getCasillaActual().getRow(), m.getCasillaActual().getColumn());
+    }
+
+    //
+    private void removeFromPath(Configuration x, int k){
+        Casilla casillaActual = new Casilla(map.getINIT_ROW(), map.getINIT_COLUMN());
+
+        for(int i = 0; i <= k; i++){
+            Casilla.avanza(casillaActual, x.getMove(i));
+        }
+
+        gui.deleteFromPath(casillaActual.getRow(), casillaActual.getColumn());
+    }
+
+    //
+    private void removeFromPath(Mark m){
+        gui.deleteFromPath(m.getCasillaActual().getRow(), m.getCasillaActual().getColumn());
     }
 }
