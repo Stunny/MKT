@@ -156,11 +156,11 @@ public class MKTBacktracking implements Solver {
 
     // Comprueba si al configuracion actual es una parte correcta de una posible solucion
     private boolean buena(Configuration x, int k) {
-        int actualMove;
+        int actualMove = x.getMove(0);
         int llavesActuales = 0;
         Casilla casillaActual = new Casilla(map.getINIT_ROW(), map.getINIT_COLUMN());
 
-        for (int i = 0; i <= k; i++) {
+        for (int i = 0; actualMove != -1; i++) {
             actualMove = x.getMove(i);
             Casilla.avanza(casillaActual, actualMove);
 
@@ -176,7 +176,7 @@ public class MKTBacktracking implements Solver {
             System.out.println("steps on level " +Integer.toString(k)+" position "+Integer.toString(i)+": "+(map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getSteps()));
             // Comrpobamos que la casilla a la que se pretende ir está pisada anteriormente
             if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getSteps() > 1) {
-                //map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).unStep();
+                map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).unStep();
                 return false;
             }
 
