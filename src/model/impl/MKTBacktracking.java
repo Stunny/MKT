@@ -180,6 +180,7 @@ public class MKTBacktracking implements Solver {
                 return false;
             }
 
+            
             llavesActuales += map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getqKeys();
         }
 
