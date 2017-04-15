@@ -46,7 +46,7 @@ public class MKTBacktracking implements Solver {
         this.map = map;
         this.gui = gui;
         xMillor = new Configuration(map.rows()*map.columns());
-        vMillor = new SolutionValue(Integer.MAX_VALUE, 0);
+        vMillor = new SolutionValue(Integer.MAX_VALUE, Integer.MAX_VALUE);
     }
 
     @Override
@@ -85,11 +85,11 @@ public class MKTBacktracking implements Solver {
      */
     public void improvedSolve(Configuration x, int k, Mark m) {
 
-        preparaRecorridoNivel(x, k);
+        preparaRecorridoNivel(x, k, m);
 
         while(haySucesor(x, k)){
 
-            try {Thread.sleep(500);} catch (InterruptedException e) {}
+            try {Thread.sleep(50);} catch (InterruptedException e) {}
 
             siguienteHermano(x, k);
             m.mark(x, k);
@@ -112,7 +112,7 @@ public class MKTBacktracking implements Solver {
     }
 
     // Inicializa la posicion 'k' de la configuracion (nivel actual de busqueda) al valor anterior al primer valor
-    // posible
+    // posible, ademas de pisar la casilla desde la que parte el nivel
     private void preparaRecorridoNivel(Configuration x, int k){
         x.setMove(k, -1);
 
@@ -123,6 +123,14 @@ public class MKTBacktracking implements Solver {
 
         map.getCasilla(actual.getRow(), actual.getColumn()).step();
 
+    }
+
+    // Inicializa la posicion 'k' de la configuracion (nivel actual de busqueda) al valor anterior al primer valor
+    // posible, ademas de pisar la casilla desde la que parte el nivel
+    private void preparaRecorridoNivel(Configuration x, int k, Mark m){
+        x.setMove(k, -1);
+
+        map.getCasilla(m.getCasillaActual().getRow(), m.getCasillaActual().getColumn()).step();
     }
 
     // Comprueba si quedan posibilidades hermanas por explorar el el actual nivel de busqueda
@@ -164,23 +172,20 @@ public class MKTBacktracking implements Solver {
             actualMove = x.getMove(i);
             Casilla.avanza(casillaActual, actualMove);
 
-            // Comprobamos que no se sale
             if (casillaActual.getColumn() < 0 || casillaActual.getColumn() > map.columns() - 1
                     || casillaActual.getRow() < 0 || casillaActual.getRow() > map.rows() - 1) {
                 return false;
             }
 
-            // Comprobamos que no es una pared
             if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof WallCasilla)
                 return false;
-            System.out.println("steps on level " +Integer.toString(k)+" position "+Integer.toString(i)+": "+(map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getSteps()));
-            // Comrpobamos que la casilla a la que se pretende ir está pisada anteriormente
-            if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getSteps() > 1) {
-                map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).unStep();
-                return false;
-            }
 
             llavesActuales += map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getqKeys();
+        }
+
+        // Comrpobamos que la casilla a la que se pretende ir está pisada anteriormente
+        if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getSteps() == 1) {
+            return false;
         }
 
         if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof TreasureCasilla){
@@ -222,6 +227,8 @@ public class MKTBacktracking implements Solver {
     // Evalua la solucion encontrada mediante la actual configuración.
     private void tratarSolucion(Configuration x){
 
+        System.out.println("SOLUCION");
+
         SolutionValue vActual = new SolutionValue(0, 0);
         Casilla casillaActual = new Casilla(map.getINIT_ROW(), map.getINIT_COLUMN());
 
@@ -245,6 +252,8 @@ public class MKTBacktracking implements Solver {
     // Evalua la solucion encontrada mediante la actual configuración utilizando el marcage establecido y, pòr tanto,
     // reduciendo el coste de la funcion
     private void tratarSolucion(Configuration x, Mark m){
+        System.out.println("SOLUCION");
+
         xMillor = new Configuration(x);
         vMillor.setKeys(m.getCurrentKeys());
         vMillor.setPathLength(m.getPathLength());
@@ -253,28 +262,39 @@ public class MKTBacktracking implements Solver {
     //
     private void addToPath(Configuration x, int k){
         Casilla casillaActual = new Casilla(map.getINIT_ROW(), map.getINIT_COLUMN());
+        int llaves = 0;
 
         for(int i = 0; i <= k; i++){
             Casilla.avanza(casillaActual, x.getMove(i));
+            llaves += map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getqKeys();
         }
 
         gui.addToPath(casillaActual.getRow(), casillaActual.getColumn());
+        gui.setPathLength(k+1);
     }
 
     //
     private void addToPath(Mark m){
         gui.addToPath(m.getCasillaActual().getRow(), m.getCasillaActual().getColumn());
+        gui.setKeysCollected(m.getCurrentKeys());
+        gui.setPathLength(m.getPathLength());
     }
 
     //
     private void removeFromPath(Configuration x, int k){
         Casilla casillaActual = new Casilla(map.getINIT_ROW(), map.getINIT_COLUMN());
+        int llavesAcxtuales = 0;
 
         for(int i = 0; i <= k; i++){
             Casilla.avanza(casillaActual, x.getMove(i));
+            llavesAcxtuales += map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getqKeys();
         }
+        llavesAcxtuales -= map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getqKeys();
 
         gui.deleteFromPath(casillaActual.getRow(), casillaActual.getColumn());
+        gui.setPathLength(k);
+        gui.setKeysCollected(llavesAcxtuales);
+
     }
 
     //
