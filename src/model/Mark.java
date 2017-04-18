@@ -25,18 +25,26 @@ public class Mark {
         casillaActual = new Casilla(m.getINIT_ROW(), m.getINIT_COLUMN());
     }
 
+    public Mark (Mark mark, Map m){
+        this.m = m;
+        casillaActual = new Casilla(mark.getCasillaActual());
+        currentKeys = mark.getCurrentKeys();
+        pathLength = mark.getPathLength();
+    }
+
     public void mark(Configuration x, int k) {
         Casilla.avanza(casillaActual, x.getMove(k));
         pathLength++;
 
-        if (casillaActual.getRow() > 0 && casillaActual.getColumn() > 0){
+        if (casillaActual.getRow() > 0 && casillaActual.getColumn() > 0
+                && casillaActual.getRow() < m.rows() && casillaActual.getColumn() < m.columns()){
             currentKeys += m.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getqKeys();
-            m.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).step();
         }
     }
 
     public void unmark(Configuration x, int k) {
-        if(casillaActual.getRow() > 0 && casillaActual.getColumn() > 0){
+        if(casillaActual.getRow() >= 0 && casillaActual.getColumn() >= 0
+                && casillaActual.getRow() < m.rows() && casillaActual.getColumn() < m.columns()){
             currentKeys -= m.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getqKeys();
             m.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).unStep();
         }

@@ -25,6 +25,7 @@ public class Main {
         Mark mark = new Mark(m);
 
         gui.startChronometer();
+        //solver.solve(x, 0);
         solver.improvedSolve(x, 0, mark);
         gui.stopChronometer();
     }

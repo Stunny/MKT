@@ -83,13 +83,16 @@ public class MKTBacktracking implements Solver {
     /**
      * Executes the search for the puzzle solutions with a better search efficiency.
      */
-    public void improvedSolve(Configuration x, int k, Mark m) {
+    public void improvedSolve(Configuration y, int k, Mark n) {
+
+        Configuration x = new Configuration(y);
+        Mark m = new Mark(n, map);
 
         preparaRecorridoNivel(x, k, m);
 
         while(haySucesor(x, k)){
 
-            try {Thread.sleep(50);} catch (InterruptedException e) {}
+            try {Thread.sleep(100);} catch (InterruptedException e) {}
 
             siguienteHermano(x, k);
             m.mark(x, k);
@@ -190,7 +193,6 @@ public class MKTBacktracking implements Solver {
 
         if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof TreasureCasilla){
             if (llavesActuales >= map.getReqKeys()) {
-                gui.addToPath(casillaActual.getRow(), casillaActual.getColumn());
                 return true;
             }
             return false;
@@ -204,6 +206,7 @@ public class MKTBacktracking implements Solver {
     private boolean buena(Configuration x, int k, Mark m) {
 
         Casilla casillaActual = m.getCasillaActual();
+        //Casilla.avanza(casillaActual, x.getMove(k));
 
         if (casillaActual.getColumn() < 0 || casillaActual.getColumn() > map.columns() - 1
                 || casillaActual.getRow() < 0 || casillaActual.getRow() > map.rows() - 1) {
@@ -213,13 +216,16 @@ public class MKTBacktracking implements Solver {
         if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof WallCasilla)
             return false;
 
-        if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getSteps() > 1){
-            map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).unStep();
+        if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getSteps() == 1){
             return false;
         }
 
-        if(map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof TreasureCasilla)
-            return m.getCurrentKeys() >= map.getReqKeys();
+        if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof TreasureCasilla){
+            if (m.getCurrentKeys() >= map.getReqKeys()) {
+                return true;
+            }
+            return false;
+        }
 
         return true;
     }
@@ -292,7 +298,7 @@ public class MKTBacktracking implements Solver {
         llavesAcxtuales -= map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getqKeys();
 
         gui.deleteFromPath(casillaActual.getRow(), casillaActual.getColumn());
-        gui.setPathLength(k);
+        gui.setPathLength(k+1);
         gui.setKeysCollected(llavesAcxtuales);
 
     }
@@ -300,5 +306,7 @@ public class MKTBacktracking implements Solver {
     //
     private void removeFromPath(Mark m){
         gui.deleteFromPath(m.getCasillaActual().getRow(), m.getCasillaActual().getColumn());
+        gui.setPathLength(m.getPathLength());
+        gui.setKeysCollected(m.getCurrentKeys());
     }
 }
