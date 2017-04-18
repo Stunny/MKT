@@ -183,6 +183,7 @@ public class MKTBacktracking implements Solver {
             if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof WallCasilla)
                 return false;
 
+            
             llavesActuales += map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getqKeys();
         }
 
