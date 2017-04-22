@@ -133,6 +133,7 @@ public class Casilla {
      * @param move
      */
     public static void retrocede(Casilla casillaActual, int move){
+        System.out.println("Retrocedo");
         switch(move){
             case Map.MOVE_UP:
                 casillaActual.setRow(casillaActual.getRow()+1);

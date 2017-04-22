@@ -36,9 +36,10 @@ public class Mark {
         Casilla.avanza(casillaActual, x.getMove(k));
         pathLength++;
 
-        if (casillaActual.getRow() > 0 && casillaActual.getColumn() > 0
+        if (casillaActual.getRow() >= 0 && casillaActual.getColumn() >= 0
                 && casillaActual.getRow() < m.rows() && casillaActual.getColumn() < m.columns()){
             currentKeys += m.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getqKeys();
+            m.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).step();
         }
     }
 
