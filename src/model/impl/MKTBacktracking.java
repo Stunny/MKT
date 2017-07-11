@@ -60,7 +60,7 @@ public class MKTBacktracking implements Solver {
         preparaRecorridoNivel(x, k);
 
         while(haySucesor(x, k)){
-            try {Thread.sleep(100);} catch (InterruptedException e) {}
+            try {Thread.sleep(10);} catch (InterruptedException e) {}
             siguienteHermano(x, k);
             if(buena(x, k)){
 
@@ -133,7 +133,7 @@ public class MKTBacktracking implements Solver {
     private void preparaRecorridoNivel(Configuration x, int k, Mark m){
         x.setMove(k, -1);
 
-        //map.getCasilla(m.getCasillaActual().getRow(), m.getCasillaActual().getColumn()).step();
+        map.getCasilla(m.getCasillaActual().getRow(), m.getCasillaActual().getColumn()).step();
     }
 
     // Comprueba si quedan posibilidades hermanas por explorar el el actual nivel de busqueda

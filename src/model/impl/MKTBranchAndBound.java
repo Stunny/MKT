@@ -40,6 +40,7 @@ public class MKTBranchAndBound implements Solver {
      */
     private Configuration xMillor;
 
+    public MKTBranchAndBound(Map m, MultiKeyTreasureGUI gui){}
 
 
     @Override
