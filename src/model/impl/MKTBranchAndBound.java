@@ -76,6 +76,7 @@ public class MKTBranchAndBound implements Solver {
                 if(buena(child) && mejorValor(valor(child), vMillor)){
 
                     if(solucion(child)){
+                        System.out.println("SOLUCION");
                         vMillor = valor(child);
                         xMillor = child;
                     }else{
@@ -155,7 +156,7 @@ public class MKTBranchAndBound implements Solver {
      */
     private void clearMap(){
         for(int j = 0; j < map.rows(); j++)
-            for(int k = 0; j < map.columns(); j++)
+            for(int k = 0; k < map.columns(); j++)
                 map.getCasilla(j, k).setSteps(0);
     }
 
@@ -165,9 +166,14 @@ public class MKTBranchAndBound implements Solver {
      * @return true si es solucion
      */
     private boolean solucion(Configuration x){
+        Casilla casillaActual = new Casilla(map.getINIT_ROW(), map.getINIT_COLUMN());
 
+        for(int i = 0; x.getMove(i) != -1; i++){
+            Casilla.avanza(casillaActual, x.getMove(i));
+        }
 
-        return false;
+        return map.getCasilla(casillaActual.getRow(), casillaActual.getColumn())
+                instanceof TreasureCasilla;
     }
 
     /**
