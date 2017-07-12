@@ -9,9 +9,12 @@ public class BBNode {
 
     private SolutionValue value;
 
-    public BBNode(Configuration configuration, SolutionValue value) {
+    private int k;
+
+    public BBNode(Configuration configuration, int k, SolutionValue value) {
         this.configuration = configuration;
         this.value = value;
+        this.k = k;
     }
 
     public Configuration getConfiguration() {
@@ -28,5 +31,13 @@ public class BBNode {
 
     public void setValue(SolutionValue value) {
         this.value = value;
+    }
+
+    public int getK() {
+        return k;
+    }
+
+    public void setK(int k) {
+        this.k = k;
     }
 }

@@ -1,7 +1,10 @@
 package model.impl;
 
 import model.*;
+import model.map.Casilla;
 import model.map.Map;
+import model.map.TreasureCasilla;
+import model.map.WallCasilla;
 import view.MultiKeyTreasureGUI;
 
 import java.util.Comparator;
@@ -60,42 +63,49 @@ public class MKTBranchAndBound implements Solver {
             }
         });
 
-        aliveNodes.add(new BBNode(x, vMillor));
+        aliveNodes.add(new BBNode(x, 0, vMillor));
+
+        BBNode actualNode;
 
         while(!aliveNodes.isEmpty()){
 
-            x = aliveNodes.poll().getConfiguration();
-            children = expand(x);
+            actualNode = aliveNodes.poll();
+            children = expand(actualNode);
 
-            for(Configuration hijoI : children){
-                if(buena(hijoI) && mejorValor(valor(hijoI), vMillor)){
+            for(Configuration child : children){
+                if(buena(child) && mejorValor(valor(child), vMillor)){
 
-                    if(solucion(hijoI)){
-                        vMillor = valor(hijoI);
-                        xMillor = hijoI;
+                    if(solucion(child)){
+                        vMillor = valor(child);
+                        xMillor = child;
                     }else{
-                        aliveNodes.add(new BBNode(hijoI, valor(hijoI)));
+                        aliveNodes.add(new BBNode(child, actualNode.getK()+1, valor(child)));
                     }
 
                 }
+                clearMap();
             }
         }
     }
 
-    @Override
-    public void improvedSolve(Configuration x, int k, Mark m) {
-
-    }
-
     /**
      * Retorna las cuatro configuraciones hijas de la especificada
-     * @param x Configuracion padre
+     * @param node Configuracion padre
      */
-    private Configuration[] expand(Configuration x){
-        Configuration goUp = new Configuration(x),
-                goDown = new Configuration(x),
-                goLeft = new Configuration(x),
-                goRight = new Configuration(x);
+    private Configuration[] expand(BBNode node){
+
+        int k = node.getK();
+        Configuration parent = node.getConfiguration();
+
+        Configuration goUp = new Configuration(parent),
+                goDown = new Configuration(parent),
+                goLeft = new Configuration(parent),
+                goRight = new Configuration(parent);
+
+        goUp.setMove(k, Map.MOVE_UP);
+        goLeft.setMove(k, Map.MOVE_LEFT);
+        goDown.setMove(k, Map.MOVE_DOWN);
+        goRight.setMove(k, Map.MOVE_RIGHT);
 
         return new Configuration[]{goUp, goLeft, goDown, goRight};
     }
@@ -106,8 +116,47 @@ public class MKTBranchAndBound implements Solver {
      * @return true si es factible o completable
      */
     private boolean buena(Configuration x){
+        int actualMove = x.getMove(0);
+        int llavesActuales = 0;
+        Casilla casillaActual = new Casilla(map.getINIT_ROW(), map.getINIT_COLUMN());
+
+        for (int i = 0; actualMove != -1; i++) {
+            actualMove = x.getMove(i);
+            Casilla.avanza(casillaActual, actualMove);
+
+            if (casillaActual.getColumn() < 0 || casillaActual.getColumn() > map.columns() - 1
+                    || casillaActual.getRow() < 0 || casillaActual.getRow() > map.rows() - 1) {
+                return false;
+            }
+
+            if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof WallCasilla)
+                return false;
+
+            map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).step();
+            if(map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getSteps() > 1){
+                return false;
+            }
+
+            llavesActuales += map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getqKeys();
+        }
+
+        if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof TreasureCasilla){
+            if (llavesActuales >= map.getReqKeys()) {
+                return true;
+            }
+            return false;
+        }
 
         return true;
+    }
+
+    /**
+     * Reinicia los pasos de todas las casillas del mapa a 0
+     */
+    private void clearMap(){
+        for(int j = 0; j < map.rows(); j++)
+            for(int k = 0; j < map.columns(); j++)
+                map.getCasilla(j, k).setSteps(0);
     }
 
     /**
@@ -127,8 +176,18 @@ public class MKTBranchAndBound implements Solver {
      * @return Valor de configuracion
      */
     private SolutionValue valor(Configuration x){
+        SolutionValue value = new SolutionValue(0, 0);
+        Casilla casillaActual = new Casilla(map.getINIT_ROW(), map.getINIT_COLUMN());
 
-        return null;
+        for(int i = 0; x.getMove(i) != -1; i++){
+            value.setPathLength(value.getPathLength()+1);
+            Casilla.avanza(casillaActual, x.getMove(i));
+            value.setKeys(
+                    value.getKeys() + map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getqKeys()
+            );
+        }
+
+        return value;
     }
 
     /**
@@ -138,7 +197,12 @@ public class MKTBranchAndBound implements Solver {
      * @return true Si el valor s1 es mejor que s2
      */
     private boolean mejorValor(SolutionValue s1, SolutionValue s2){
+        return (s1.getKeys()/s1.getPathLength()) > (s2.getKeys()/s2.getPathLength());
+    }
 
-        return false;
+
+    @Override
+    public void improvedSolve(Configuration x, int k, Mark m) {
+
     }
 }

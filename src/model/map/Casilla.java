@@ -99,6 +99,8 @@ public class Casilla {
         steps = steps != 0 ? steps-1 : steps;
     }
 
+    public void setSteps(int steps){this.steps = steps;}
+
     /**
      *
      * @return
