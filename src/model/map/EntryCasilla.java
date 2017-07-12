@@ -7,5 +7,6 @@ public class EntryCasilla extends Casilla{
 
     public EntryCasilla(int row, int column){
         super(row, column);
+        //super.step();
     }
 }

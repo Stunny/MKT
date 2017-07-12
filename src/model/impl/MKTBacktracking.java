@@ -4,10 +4,7 @@ import model.Configuration;
 import model.Mark;
 import model.SolutionValue;
 import model.Solver;
-import model.map.Casilla;
-import model.map.Map;
-import model.map.TreasureCasilla;
-import model.map.WallCasilla;
+import model.map.*;
 import view.MultiKeyTreasureGUI;
 
 /**
@@ -60,7 +57,6 @@ public class MKTBacktracking implements Solver {
         preparaRecorridoNivel(x, k);
 
         while(haySucesor(x, k)){
-            try {Thread.sleep(10);} catch (InterruptedException e) {}
             siguienteHermano(x, k);
             if(buena(x, k)){
 
@@ -77,6 +73,7 @@ public class MKTBacktracking implements Solver {
 
         }
 
+        descartaNivel(x, k);
     }
 
     @Override
@@ -92,7 +89,7 @@ public class MKTBacktracking implements Solver {
 
         while(haySucesor(x, k)){
 
-            try {Thread.sleep(10);} catch (InterruptedException e) {}
+            try {Thread.sleep(3);} catch (InterruptedException e) {}
 
             siguienteHermano(x, k);
             m.mark(x, k);
@@ -111,11 +108,11 @@ public class MKTBacktracking implements Solver {
 
             m.unmark(x, k);
         }
-
     }
 
-    // Inicializa la posicion 'k' de la configuracion (nivel actual de busqueda) al valor anterior al primer valor
-    // posible, ademas de pisar la casilla desde la que parte el nivel
+    /** Inicializa la posicion 'k' de la configuracion (nivel actual de busqueda) al valor anterior al primer valor
+     * posible, ademas de pisar la casilla desde la que parte el nivel
+     */
     private void preparaRecorridoNivel(Configuration x, int k){
         x.setMove(k, -1);
 
@@ -128,12 +125,25 @@ public class MKTBacktracking implements Solver {
 
     }
 
-    // Inicializa la posicion 'k' de la configuracion (nivel actual de busqueda) al valor anterior al primer valor
-    // posible, ademas de pisar la casilla desde la que parte el nivel
+    /**
+     *
+     * @param x
+     * @param k
+     */
+    private void descartaNivel(Configuration x, int k){
+        Casilla actual = new Casilla(map.getINIT_ROW(), map.getINIT_COLUMN());
+        for(int i = 0; x.getMove(i) != -1; i++){
+            Casilla.avanza(actual, x.getMove(i));
+        }
+
+        map.getCasilla(actual.getRow(), actual.getColumn()).unStep();
+    }
+
+    /**Inicializa la posicion 'k' de la configuracion (nivel actual de busqueda) al valor anterior al primer valor
+     * posible, ademas de pisar la casilla desde la que parte el nivel
+     */
     private void preparaRecorridoNivel(Configuration x, int k, Mark m){
         x.setMove(k, -1);
-
-        map.getCasilla(m.getCasillaActual().getRow(), m.getCasillaActual().getColumn()).step();
     }
 
     // Comprueba si quedan posibilidades hermanas por explorar el el actual nivel de busqueda
@@ -216,6 +226,9 @@ public class MKTBacktracking implements Solver {
         if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof WallCasilla)
             return false;
 
+        if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof EntryCasilla)
+            return false;
+
         if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getSteps() > 1){
             return false;
         }
@@ -275,6 +288,7 @@ public class MKTBacktracking implements Solver {
             llaves += map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getqKeys();
         }
 
+        //casillaActual.step();
         gui.addToPath(casillaActual.getRow(), casillaActual.getColumn());
         gui.setPathLength(k+1);
     }
@@ -296,6 +310,8 @@ public class MKTBacktracking implements Solver {
             llavesActuales += map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getqKeys();
         }
         llavesActuales -= map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getqKeys();
+
+        //casillaActual.unStep();
 
         gui.deleteFromPath(casillaActual.getRow(), casillaActual.getColumn());
         gui.setPathLength(k+1);
