@@ -89,7 +89,7 @@ public class MKTBacktracking implements Solver {
 
         while(haySucesor(x, k)){
 
-            try {Thread.sleep(3);} catch (InterruptedException e) {}
+            //try {Thread.sleep(10);} catch (InterruptedException e) {}
 
             siguienteHermano(x, k);
             m.mark(x, k);

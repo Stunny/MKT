@@ -1,13 +1,10 @@
 package model.impl;
 
 import model.*;
-import model.map.Casilla;
-import model.map.Map;
-import model.map.TreasureCasilla;
-import model.map.WallCasilla;
+import model.map.*;
+import model.utils.SolutionGUIBuilder;
 import view.MultiKeyTreasureGUI;
 
-import java.util.Comparator;
 import java.util.PriorityQueue;
 
 /**
@@ -18,7 +15,12 @@ public class MKTBranchAndBound implements Solver {
     /**
      * Solve GUI
      */
-    private MultiKeyTreasureGUI gui;
+    private MultiKeyTreasureGUI progressGUI;
+
+    /**
+     * Best solution GUI
+     */
+    private SolutionGUIBuilder bestSolutionGUIbuilder;
 
     /**
      * Labirynth map
@@ -37,9 +39,14 @@ public class MKTBranchAndBound implements Solver {
 
     public MKTBranchAndBound(Map m, MultiKeyTreasureGUI gui){
         this.map = m;
-        this.gui = gui;
+        this.progressGUI = gui;
+
         xMillor = new Configuration(map.rows()*map.columns());
-        vMillor = new SolutionValue(map.rows()*map.columns(), 0);
+        vMillor = new SolutionValue(map.rows()*map.columns(), map.rows()*map.columns());
+
+        bestSolutionGUIbuilder = new SolutionGUIBuilder(map);
+        bestSolutionGUIbuilder.setValue(vMillor);
+        bestSolutionGUIbuilder.setSolution(xMillor);
     }
 
 
@@ -50,18 +57,15 @@ public class MKTBranchAndBound implements Solver {
         Configuration[] children;
 
         PriorityQueue<BBNode> aliveNodes =
-                new PriorityQueue<>(map.rows() * map.columns(), new Comparator<BBNode>() {
-            @Override
-            public int compare(BBNode o1, BBNode o2) {
-                if(o1.getValue().getKeys()/o1.getValue().getPathLength() > o2.getValue().getKeys()/o2.getValue().getPathLength()){
-                    return 1;
-                }
-                if(o1.getValue().getKeys()/o1.getValue().getPathLength() < o2.getValue().getKeys()/o2.getValue().getPathLength()){
-                    return -1;
-                }
-                return 0;
-            }
-        });
+                new PriorityQueue<>(map.rows() * map.columns(), (o1, o2) -> {
+                    if(o1.getValue().getKeys()/o1.getValue().getPathLength() > o2.getValue().getKeys()/o2.getValue().getPathLength()){
+                        return 1;
+                    }
+                    if(o1.getValue().getKeys()/o1.getValue().getPathLength() < o2.getValue().getKeys()/o2.getValue().getPathLength()){
+                        return -1;
+                    }
+                    return 0;
+                });
 
         aliveNodes.add(new BBNode(x, 0, vMillor));
 
@@ -73,17 +77,28 @@ public class MKTBranchAndBound implements Solver {
             children = expand(actualNode);
 
             for(Configuration child : children){
-                if(buena(child) && mejorValor(valor(child), vMillor)){
 
-                    if(solucion(child)){
+                if(buena(child)){
+                    if(solucion(child) && mejorCamino(valor(child), vMillor)){
                         System.out.println("SOLUCION");
                         vMillor = valor(child);
                         xMillor = child;
-                    }else{
+
+                        if(bestSolutionGUIbuilder.isAlive())
+                            bestSolutionGUIbuilder.clear();
+
+                        bestSolutionGUIbuilder = new SolutionGUIBuilder(map);
+
+                        bestSolutionGUIbuilder.setSolution(xMillor);
+                        bestSolutionGUIbuilder.setValue(vMillor);
+                        bestSolutionGUIbuilder.start();
+
+                    }else if(mejorCamino(valor(child), vMillor)){
                         aliveNodes.add(new BBNode(child, actualNode.getK()+1, valor(child)));
                     }
 
                 }
+
                 clearMap();
             }
         }
@@ -117,13 +132,15 @@ public class MKTBranchAndBound implements Solver {
      * @return true si es factible o completable
      */
     private boolean buena(Configuration x){
-        int actualMove = x.getMove(0);
-        int llavesActuales = 0;
+        int actualMove;
+        int llavesActuales = 0, i = 0;
         Casilla casillaActual = new Casilla(map.getINIT_ROW(), map.getINIT_COLUMN());
 
-        for (int i = 0; actualMove != -1; i++) {
-            actualMove = x.getMove(i);
-            Casilla.avanza(casillaActual, actualMove);
+        actualMove = x.getMove(i);
+        Casilla.avanza(casillaActual, actualMove);
+
+
+        do {
 
             if (casillaActual.getColumn() < 0 || casillaActual.getColumn() > map.columns() - 1
                     || casillaActual.getRow() < 0 || casillaActual.getRow() > map.rows() - 1) {
@@ -133,13 +150,18 @@ public class MKTBranchAndBound implements Solver {
             if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof WallCasilla)
                 return false;
 
+
             map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).step();
             if(map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getSteps() > 1){
                 return false;
             }
 
             llavesActuales += map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getqKeys();
-        }
+
+            i++;
+            actualMove = x.getMove(i);
+            Casilla.avanza(casillaActual, actualMove);
+        } while(actualMove != -1);
 
         if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof TreasureCasilla){
             if (llavesActuales >= map.getReqKeys()) {
@@ -156,7 +178,7 @@ public class MKTBranchAndBound implements Solver {
      */
     private void clearMap(){
         for(int j = 0; j < map.rows(); j++)
-            for(int k = 0; k < map.columns(); j++)
+            for(int k = 0; k < map.columns(); k++)
                 map.getCasilla(j, k).setSteps(0);
     }
 
@@ -197,13 +219,14 @@ public class MKTBranchAndBound implements Solver {
     }
 
     /**
+     * PBMSC
      * Comprueba si el primer valor de solucion es mejor que el segundo
      * @param s1 Valor de solucion a comparar
      * @param s2 Valor de solucion con el que comparar
      * @return true Si el valor s1 es mejor que s2
      */
-    private boolean mejorValor(SolutionValue s1, SolutionValue s2){
-        return (s1.getKeys()/s1.getPathLength()) > (s2.getKeys()/s2.getPathLength());
+    private boolean mejorCamino(SolutionValue s1, SolutionValue s2){
+        return (s1.getPathLength() < s2.getPathLength() && s1.getKeys() < s2.getKeys());
     }
 
 

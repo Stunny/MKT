@@ -14,39 +14,40 @@ public class Main {
     public static void main(String[] args) {
 
         Map m = new Map(args[0]);
-        MultiKeyTreasureGUI gui = new MultiKeyTreasureGUI(500, 500, "MKT", m.getRawMap());
+        MultiKeyTreasureGUI progressGUI = new MultiKeyTreasureGUI(500, 500, "MKT", m.getRawMap());
+
         System.out.println(m.getINIT_COLUMN()+","+m.getINIT_ROW());
 
-        gui.setPathLength(0);
-        gui.setKeysCollected(0);
+        progressGUI.setPathLength(0);
+        progressGUI.setKeysCollected(0);
 
         Configuration x = new Configuration(m.rows()*m.columns());
         Mark mark = new Mark(m);
 
         switch(args[1]){
             case "BTSM":
-                Solver solver = new MKTBacktracking(m, gui);
-                gui.startChronometer();
+                Solver solver = new MKTBacktracking(m, progressGUI);
+                progressGUI.startChronometer();
                 solver.solve(x, 0);
-                gui.stopChronometer();
+                progressGUI.stopChronometer();
                 break;
             case "BTAM":
-                Solver solver2 = new MKTBacktracking(m, gui);
-                gui.startChronometer();
+                Solver solver2 = new MKTBacktracking(m, progressGUI);
+                progressGUI.startChronometer();
                 solver2.improvedSolve(x, 0, mark);
-                gui.stopChronometer();
+                progressGUI.stopChronometer();
                 break;
             case "BBSM":
-                Solver solver3 = new MKTBranchAndBound(m, gui);
-                gui.startChronometer();
+                Solver solver3 = new MKTBranchAndBound(m, progressGUI);
+                progressGUI.startChronometer();
                 solver3.solve(x, 0);
-                gui.stopChronometer();
+                progressGUI.stopChronometer();
                 break;
             case "BBAM":
-                Solver solver4 = new MKTBranchAndBound(m, gui);
-                gui.startChronometer();
+                Solver solver4 = new MKTBranchAndBound(m, progressGUI);
+                progressGUI.startChronometer();
                 solver4.improvedSolve(x, 0, mark);
-                gui.stopChronometer();
+                progressGUI.stopChronometer();
                 break;
             default: System.exit(0);
         }
