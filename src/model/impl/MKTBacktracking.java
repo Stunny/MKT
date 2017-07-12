@@ -8,9 +8,9 @@ import model.map.*;
 import view.MultiKeyTreasureGUI;
 
 /**
- *
- * @author Alex Vogel & Victor Garrido
- * @version 1.0 04/2017
+ * Clase que implementa un solucionador del laberinto mediante el algoritmo de Backtracking
+ * @author Alex Vogel
+ * @version 2.0 07/2017
  * @see model.Solver
  */
 public class MKTBacktracking implements Solver {
@@ -126,9 +126,9 @@ public class MKTBacktracking implements Solver {
     }
 
     /**
-     *
-     * @param x
-     * @param k
+     * Actualiza la casilla actual como que ya no esta pisada
+     * @param x Configuracion actual
+     * @param k Nivel de busqueda actual
      */
     private void descartaNivel(Configuration x, int k){
         Casilla actual = new Casilla(map.getINIT_ROW(), map.getINIT_COLUMN());
@@ -146,18 +146,21 @@ public class MKTBacktracking implements Solver {
         x.setMove(k, -1);
     }
 
-    // Comprueba si quedan posibilidades hermanas por explorar el el actual nivel de busqueda
+    /** Comprueba si quedan posibilidades hermanas por explorar el el actual nivel de busqueda
+    */
     private boolean haySucesor(Configuration x, int k){
         return x.getMove(k) < 4;
     }
 
-    // Actualiza el valor de la configuracion en la posición 'k' a la siguiente posibilidad a explorar
+    /** Actualiza el valor de la configuracion en la posición 'k' a la siguiente posibilidad a explorar
+    */
     private void siguienteHermano(Configuration x, int k){
         x.setMove(k, x.getMove(k)+1);
     }
 
-    // Comprueba si el nivel actual de busqueda, en la posibilidad establecida, hace que la configuracion actual sea una
-    // solucion
+    /** Comprueba si el nivel actual de busqueda, en la posibilidad establecida, hace que la configuracion actual sea una
+     * solucion
+    */
     private boolean solucion(Configuration x, int k){
         Casilla casillaActual = new Casilla(map.getINIT_ROW(), map.getINIT_COLUMN());
 
@@ -168,14 +171,16 @@ public class MKTBacktracking implements Solver {
         return map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof TreasureCasilla;
     }
 
-    // Comprueba si el nivel actual de busqueda, en la posibilidad establecida, hace que la configuracion actual sea una
-    // solucion, utilizando el marcage establecido y, por tanto, reduciendo el coste de la funcion
+    /** Comprueba si el nivel actual de busqueda, en la posibilidad establecida, hace que la configuracion actual sea una
+     * solucion, utilizando el marcage establecido y, por tanto, reduciendo el coste de la funcion
+    */
     private boolean solucion(Configuration x, int k, Mark m){
         return map.getCasilla(m.getCasillaActual().getRow(), m.getCasillaActual().getColumn())
                 instanceof TreasureCasilla;
     }
 
-    // Comprueba si al configuracion actual es una parte correcta de una posible solucion
+    /** Comprueba si al configuracion actual es una parte correcta de una posible solucion
+    */
     private boolean buena(Configuration x, int k) {
         int actualMove = x.getMove(0);
         int llavesActuales = 0;
@@ -212,8 +217,9 @@ public class MKTBacktracking implements Solver {
         return true;
     }
 
-    // Comprueba si al configuracion actual es una parte correcta de una posible solucion utilizando el marcage
+    /** Comprueba si al configuracion actual es una parte correcta de una posible solucion utilizando el marcage
     // establecido, y, por tanto, reduciendo el coste de la funcion
+    */
     private boolean buena(Configuration x, int k, Mark m) {
 
         Casilla casillaActual = m.getCasillaActual();
@@ -243,7 +249,8 @@ public class MKTBacktracking implements Solver {
         return true;
     }
 
-    // Evalua la solucion encontrada mediante la actual configuración.
+    /** Evalua la solucion encontrada mediante la actual configuración.
+    */
     private void tratarSolucion(Configuration x){
 
         System.out.println("SOLUCION");
@@ -268,8 +275,9 @@ public class MKTBacktracking implements Solver {
 
     }
 
-    // Evalua la solucion encontrada mediante la actual configuración utilizando el marcage establecido y, pòr tanto,
+    /** Evalua la solucion encontrada mediante la actual configuración utilizando el marcage establecido y, pòr tanto,
     // reduciendo el coste de la funcion
+    */
     private void tratarSolucion(Configuration x, Mark m){
         System.out.println("SOLUCION");
 
@@ -278,7 +286,11 @@ public class MKTBacktracking implements Solver {
         vMillor.setPathLength(m.getPathLength());
     }
 
-    //
+    /**
+     * Actualiza la vista conforme a la configuracion actual
+     * @param x Configuarcion actual
+     * @param k Nivel de busqueda actual
+     */
     private void addToPath(Configuration x, int k){
         Casilla casillaActual = new Casilla(map.getINIT_ROW(), map.getINIT_COLUMN());
         int llaves = 0;
@@ -293,14 +305,21 @@ public class MKTBacktracking implements Solver {
         gui.setPathLength(k+1);
     }
 
-    //
+    /**
+     * Actualiza la vista conforme al marcage actual
+     * @param m Marcage actual
+     */
     private void addToPath(Mark m){
         gui.addToPath(m.getCasillaActual().getRow(), m.getCasillaActual().getColumn());
         gui.setKeysCollected(m.getCurrentKeys());
         gui.setPathLength(m.getPathLength());
     }
 
-    //
+    /**
+     * Actualiza la vista, retrocediendo el camino, conforme a la configuracion actual
+     * @param x Configuracion actual
+     * @param k Nivel de busqueda actual
+     */
     private void removeFromPath(Configuration x, int k){
         Casilla casillaActual = new Casilla(map.getINIT_ROW(), map.getINIT_COLUMN());
         int llavesActuales = 0;
@@ -319,7 +338,10 @@ public class MKTBacktracking implements Solver {
 
     }
 
-    //
+    /**
+     * Actualiza la vista, retrocediendo el camino, conforme al marcage actual
+     * @param m Marcage actual
+     */
     private void removeFromPath(Mark m){
         gui.deleteFromPath(m.getCasillaActual().getRow(), m.getCasillaActual().getColumn());
         gui.setPathLength(m.getPathLength());
