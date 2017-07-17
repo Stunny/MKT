@@ -67,7 +67,6 @@ public class MKTBranchAndBound implements Solver {
         BBNode actualNode;
 
         while(!aliveNodes.isEmpty()){
-
             actualNode = aliveNodes.poll();
             children = expand(actualNode);
 
@@ -230,6 +229,7 @@ public class MKTBranchAndBound implements Solver {
 
     @Override
     public void improvedSolve(Configuration y, int k, Mark m) {
+
         SolutionGUIBuilder bestSolutionGUIbuilder = new SolutionGUIBuilder(map);
         bestSolutionGUIbuilder.setValue(vMillor);
         bestSolutionGUIbuilder.setSolution(xMillor);
@@ -256,7 +256,7 @@ public class MKTBranchAndBound implements Solver {
         Mark childM;
 
         while(!aliveNodes.isEmpty()){
-
+            //System.out.println(aliveNodes.size());
             actualNode = aliveNodes.poll();
             children = expand(actualNode);
 
@@ -267,12 +267,13 @@ public class MKTBranchAndBound implements Solver {
                 childM = child.getMark();
 
                 if(buena(childX, childM)){
-                    System.out.println("buena");
 
                     if(solucion(childM) && mejorCamino(valor(childM), vMillor)){
                         System.out.println("SOLUCION");
                         vMillor = valor(childM);
                         xMillor = childX;
+
+                        System.out.println(childM.getCurrentKeys());
 
                         if(bestSolutionGUIbuilder.isAlive()) bestSolutionGUIbuilder.interrupt();
                         bestSolutionGUIbuilder.clear();
@@ -283,12 +284,10 @@ public class MKTBranchAndBound implements Solver {
                         bestSolutionGUIbuilder.start();
 
                     }else if(mejorCamino(valor(childM), vMillor)){
-                        aliveNodes.add(new BBMarkedNode(childX, child.getK()+1, valor(childM), childM));
+                        aliveNodes.add(new BBMarkedNode(childX, child.getK(), valor(childM), childM));
                     }
 
                 }
-
-                clearMap();
             }
         }
     }
@@ -299,47 +298,43 @@ public class MKTBranchAndBound implements Solver {
         Configuration parentX = node.getConfiguration();
         Mark parentM = node.getMark();
 
+
         Configuration goUp = new Configuration(parentX),
                 goDown = new Configuration(parentX),
                 goLeft = new Configuration(parentX),
                 goRight = new Configuration(parentX);
 
         goUp.setMove(k, Map.MOVE_UP);
-        Mark upMark = new Mark(parentM, map);
+        Mark upMark = new Mark(parentM, new Map(parentM.getMap()));
         upMark.mark(goUp, k);
         SolutionValue upValue = new SolutionValue(k, upMark.getCurrentKeys());
 
         goLeft.setMove(k, Map.MOVE_LEFT);
-        Mark leftMark = new Mark(parentM, map);
+        Mark leftMark = new Mark(parentM, new Map(parentM.getMap()));
         leftMark.mark(goLeft, k);
         SolutionValue leftValue = new SolutionValue(k, leftMark.getCurrentKeys());
 
         goDown.setMove(k, Map.MOVE_DOWN);
-        Mark downMark = new Mark(parentM, map);
+        Mark downMark = new Mark(parentM, new Map(parentM.getMap()));
         downMark.mark(goDown, k);
         SolutionValue downvalue = new SolutionValue(k, downMark.getCurrentKeys());
 
         goRight.setMove(k, Map.MOVE_RIGHT);
-        Mark rightMark = new Mark(parentM, map);
+        Mark rightMark = new Mark(parentM, new Map(parentM.getMap()));
         rightMark.mark(goRight, k);
         SolutionValue rightValue = new SolutionValue(k, rightMark.getCurrentKeys());
 
         return new BBMarkedNode[]{
-                new BBMarkedNode(goUp, k, upValue, upMark),
-                new BBMarkedNode(goLeft, k, leftValue, leftMark),
-                new BBMarkedNode(goDown, k, downvalue, downMark),
-                new BBMarkedNode(goRight, k, rightValue, rightMark)
+                new BBMarkedNode(goUp, k+1, upValue, upMark),
+                new BBMarkedNode(goLeft, k+1, leftValue, leftMark),
+                new BBMarkedNode(goDown, k+1, downvalue, downMark),
+                new BBMarkedNode(goRight, k+1, rightValue, rightMark)
         };
     }
 
     private boolean buena(Configuration x, Mark m){
 
         Casilla casillaActual = m.getCasillaActual();
-        int actualMove = x.getMove(m.getPathLength()-1);
-
-        clearMap();
-
-        Casilla.avanza(casillaActual, actualMove);
 
         if (casillaActual.getColumn() < 0 || casillaActual.getColumn() > map.columns() - 1
                 || casillaActual.getRow() < 0 || casillaActual.getRow() > map.rows() - 1) {
@@ -352,18 +347,12 @@ public class MKTBranchAndBound implements Solver {
         if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof EntryCasilla)
             return false;
 
-
-        m.getCasillaActual().step();
-        if(m.getCasillaActual().getSteps() > 1){
-            m.getCasillaActual().unStep();
+        if(m.getCasillaActual().getSteps() == 1){
             return false;
         }
 
         if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof TreasureCasilla){
-            if (m.getCurrentKeys() >= map.getReqKeys()) {
-                return true;
-            }
-            return false;
+            return m.getCurrentKeys() >= map.getReqKeys();
         }
 
         return true;
@@ -372,7 +361,7 @@ public class MKTBranchAndBound implements Solver {
 
     private boolean solucion(Mark m){
         return map.getCasilla(m.getCasillaActual().getRow(), m.getCasillaActual().getColumn())
-                instanceof TreasureCasilla;
+                instanceof TreasureCasilla && m.getCurrentKeys() >= map.getReqKeys();
     }
 
     private SolutionValue valor(Mark m){

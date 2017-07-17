@@ -99,8 +99,12 @@ public class Map {
 
         laberinto = new Casilla[map.rows()][map.columns()];
         for(int i = 0; i < map.rows(); i++)
-            for(int j = 0; j < map.columns(); j++)
-                laberinto[i][j] = new Casilla(map.getCasilla(i, j));
+            for(int j = 0; j < map.columns(); j++){
+
+            laberinto[i][j] = new Casilla(map.getCasilla(i, j).getqKeys(), i, j);
+            laberinto[i][j].setSteps(map.getCasilla(i, j).getSteps());
+
+            }
     }
 
     public Casilla getCasilla(int row, int column){

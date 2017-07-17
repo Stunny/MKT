@@ -59,4 +59,11 @@ public class Mark {
 
     public int getPathLength(){return pathLength;}
 
+    public Map getMap() {
+        return m;
+    }
+
+    public void setMap(Map m) {
+        this.m = m;
+    }
 }

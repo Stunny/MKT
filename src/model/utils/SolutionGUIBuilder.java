@@ -29,6 +29,7 @@ public class SolutionGUIBuilder extends Thread {
 
         solutionGui = new MultiKeyTreasureGUI(500, 500, "SOLUTION", map.getRawMap());
         solutionGui.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        solutionGui.setLocationRelativeTo(null);
 
     }
 

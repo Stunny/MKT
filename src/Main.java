@@ -16,13 +16,13 @@ public class Main {
         Map m = new Map(args[0]);
         MultiKeyTreasureGUI progressGUI = new MultiKeyTreasureGUI(500, 500, "MKT", m.getRawMap());
 
-        System.out.println(m.getINIT_COLUMN()+","+m.getINIT_ROW());
+        System.out.println("CASILLA INICIAL: "+m.getINIT_COLUMN()+","+m.getINIT_ROW());
 
         progressGUI.setPathLength(0);
         progressGUI.setKeysCollected(0);
 
         Configuration x = new Configuration(m.rows()*m.columns());
-        Mark mark = new Mark(m);
+        Mark mark = new Mark(new Map(m));
 
         switch(args[1]){
             case "BTSM":
