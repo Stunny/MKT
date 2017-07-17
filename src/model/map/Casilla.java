@@ -43,6 +43,7 @@ public class Casilla {
         this.qKeys = c.getqKeys();
         this.row = c.getRow();
         this.column = c.getColumn();
+        this.steps = c.getSteps();
     }
 
     /**

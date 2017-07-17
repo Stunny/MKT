@@ -91,6 +91,18 @@ public class Map {
         }
     }
 
+    public Map(Map map){
+        this.rawMap = map.getRawMap();
+        this.INIT_ROW = map.getINIT_ROW();
+        this.INIT_COLUMN = map.getINIT_COLUMN();
+        this.reqKeys = map.getReqKeys();
+
+        laberinto = new Casilla[map.rows()][map.columns()];
+        for(int i = 0; i < map.rows(); i++)
+            for(int j = 0; j < map.columns(); j++)
+                laberinto[i][j] = new Casilla(map.getCasilla(i, j));
+    }
+
     public Casilla getCasilla(int row, int column){
 
         Casilla aux = null;

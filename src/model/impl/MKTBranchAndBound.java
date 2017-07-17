@@ -226,9 +226,156 @@ public class MKTBranchAndBound implements Solver {
         return (s1.getKeys() <= s2.getKeys() && s1.getPathLength() < s2.getPathLength());
     }
 
+    //**************************************************************************************************************//
 
     @Override
-    public void improvedSolve(Configuration x, int k, Mark m) {
+    public void improvedSolve(Configuration y, int k, Mark m) {
+        SolutionGUIBuilder bestSolutionGUIbuilder = new SolutionGUIBuilder(map);
+        bestSolutionGUIbuilder.setValue(vMillor);
+        bestSolutionGUIbuilder.setSolution(xMillor);
 
+        Configuration x = new Configuration(y);
+        BBMarkedNode[] children;
+
+        PriorityQueue<BBMarkedNode> aliveNodes =
+                new PriorityQueue<>(map.rows() * map.columns(), (o1, o2) -> {
+                    if(o1.getValue().getKeys()/o1.getValue().getPathLength() > o2.getValue().getKeys()/o2.getValue().getPathLength()){
+                        return 1;
+                    }
+                    if(o1.getValue().getKeys()/o1.getValue().getPathLength() < o2.getValue().getKeys()/o2.getValue().getPathLength()){
+                        return -1;
+                    }
+                    return 0;
+                });
+
+        aliveNodes.add(new BBMarkedNode(x, 0, vMillor, m));
+
+        BBMarkedNode actualNode;
+
+        Configuration childX;
+        Mark childM;
+
+        while(!aliveNodes.isEmpty()){
+
+            actualNode = aliveNodes.poll();
+            children = expand(actualNode);
+
+            for(BBMarkedNode child : children){
+                //try{Thread.sleep(10);}catch(InterruptedException e){}
+
+                childX = child.getConfiguration();
+                childM = child.getMark();
+
+                if(buena(childX, childM)){
+                    System.out.println("buena");
+
+                    if(solucion(childM) && mejorCamino(valor(childM), vMillor)){
+                        System.out.println("SOLUCION");
+                        vMillor = valor(childM);
+                        xMillor = childX;
+
+                        if(bestSolutionGUIbuilder.isAlive()) bestSolutionGUIbuilder.interrupt();
+                        bestSolutionGUIbuilder.clear();
+                        bestSolutionGUIbuilder = new SolutionGUIBuilder(map);
+
+                        bestSolutionGUIbuilder.setSolution(xMillor);
+                        bestSolutionGUIbuilder.setValue(vMillor);
+                        bestSolutionGUIbuilder.start();
+
+                    }else if(mejorCamino(valor(childM), vMillor)){
+                        aliveNodes.add(new BBMarkedNode(childX, child.getK()+1, valor(childM), childM));
+                    }
+
+                }
+
+                clearMap();
+            }
+        }
+    }
+
+    private BBMarkedNode[] expand(BBMarkedNode node){
+
+        int k = node.getK();
+        Configuration parentX = node.getConfiguration();
+        Mark parentM = node.getMark();
+
+        Configuration goUp = new Configuration(parentX),
+                goDown = new Configuration(parentX),
+                goLeft = new Configuration(parentX),
+                goRight = new Configuration(parentX);
+
+        goUp.setMove(k, Map.MOVE_UP);
+        Mark upMark = new Mark(parentM, map);
+        upMark.mark(goUp, k);
+        SolutionValue upValue = new SolutionValue(k, upMark.getCurrentKeys());
+
+        goLeft.setMove(k, Map.MOVE_LEFT);
+        Mark leftMark = new Mark(parentM, map);
+        leftMark.mark(goLeft, k);
+        SolutionValue leftValue = new SolutionValue(k, leftMark.getCurrentKeys());
+
+        goDown.setMove(k, Map.MOVE_DOWN);
+        Mark downMark = new Mark(parentM, map);
+        downMark.mark(goDown, k);
+        SolutionValue downvalue = new SolutionValue(k, downMark.getCurrentKeys());
+
+        goRight.setMove(k, Map.MOVE_RIGHT);
+        Mark rightMark = new Mark(parentM, map);
+        rightMark.mark(goRight, k);
+        SolutionValue rightValue = new SolutionValue(k, rightMark.getCurrentKeys());
+
+        return new BBMarkedNode[]{
+                new BBMarkedNode(goUp, k, upValue, upMark),
+                new BBMarkedNode(goLeft, k, leftValue, leftMark),
+                new BBMarkedNode(goDown, k, downvalue, downMark),
+                new BBMarkedNode(goRight, k, rightValue, rightMark)
+        };
+    }
+
+    private boolean buena(Configuration x, Mark m){
+
+        Casilla casillaActual = m.getCasillaActual();
+        int actualMove = x.getMove(m.getPathLength()-1);
+
+        clearMap();
+
+        Casilla.avanza(casillaActual, actualMove);
+
+        if (casillaActual.getColumn() < 0 || casillaActual.getColumn() > map.columns() - 1
+                || casillaActual.getRow() < 0 || casillaActual.getRow() > map.rows() - 1) {
+            return false;
+        }
+
+        if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof WallCasilla)
+            return false;
+
+        if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof EntryCasilla)
+            return false;
+
+
+        m.getCasillaActual().step();
+        if(m.getCasillaActual().getSteps() > 1){
+            m.getCasillaActual().unStep();
+            return false;
+        }
+
+        if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof TreasureCasilla){
+            if (m.getCurrentKeys() >= map.getReqKeys()) {
+                return true;
+            }
+            return false;
+        }
+
+        return true;
+
+    }
+
+    private boolean solucion(Mark m){
+        return map.getCasilla(m.getCasillaActual().getRow(), m.getCasillaActual().getColumn())
+                instanceof TreasureCasilla;
+    }
+
+    private SolutionValue valor(Mark m){
+        return new SolutionValue(m.getPathLength(), m.getCurrentKeys());
     }
 }
