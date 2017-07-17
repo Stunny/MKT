@@ -6,6 +6,8 @@ import model.map.Casilla;
 import model.map.Map;
 import view.MultiKeyTreasureGUI;
 
+import javax.swing.*;
+
 /**
  * Created by Alex on 12/07/2017.
  */
@@ -25,11 +27,12 @@ public class SolutionGUIBuilder extends Thread {
 
         this.map = m;
 
+        solutionGui = new MultiKeyTreasureGUI(500, 500, "SOLUTION", map.getRawMap());
+        solutionGui.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
     }
 
     public void run(){
-
-        solutionGui = new MultiKeyTreasureGUI(500, 500, "SOLUTION", map.getRawMap());
 
         int i = 0;
 
@@ -51,7 +54,7 @@ public class SolutionGUIBuilder extends Thread {
 
     public void clear(){
         if(solutionGui != null)
-            solutionGui.setVisible(false);
+            solutionGui.dispose();
     }
 
     public void setSolution(Configuration solution) {

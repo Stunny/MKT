@@ -18,11 +18,6 @@ public class MKTBranchAndBound implements Solver {
     private MultiKeyTreasureGUI progressGUI;
 
     /**
-     * Best solution GUI
-     */
-    private SolutionGUIBuilder bestSolutionGUIbuilder;
-
-    /**
      * Labirynth map
      */
     private Map map;
@@ -43,15 +38,15 @@ public class MKTBranchAndBound implements Solver {
 
         xMillor = new Configuration(map.rows()*map.columns());
         vMillor = new SolutionValue(map.rows()*map.columns(), map.rows()*map.columns());
-
-        bestSolutionGUIbuilder = new SolutionGUIBuilder(map);
-        bestSolutionGUIbuilder.setValue(vMillor);
-        bestSolutionGUIbuilder.setSolution(xMillor);
     }
 
 
     @Override
     public void solve(Configuration y, int k) {
+
+        SolutionGUIBuilder bestSolutionGUIbuilder = new SolutionGUIBuilder(map);
+        bestSolutionGUIbuilder.setValue(vMillor);
+        bestSolutionGUIbuilder.setSolution(xMillor);
 
         Configuration x = new Configuration(y);
         Configuration[] children;
@@ -84,9 +79,8 @@ public class MKTBranchAndBound implements Solver {
                         vMillor = valor(child);
                         xMillor = child;
 
-                        if(bestSolutionGUIbuilder.isAlive())
-                            bestSolutionGUIbuilder.clear();
-
+                        if(bestSolutionGUIbuilder.isAlive()) bestSolutionGUIbuilder.interrupt();
+                        bestSolutionGUIbuilder.clear();
                         bestSolutionGUIbuilder = new SolutionGUIBuilder(map);
 
                         bestSolutionGUIbuilder.setSolution(xMillor);
@@ -137,17 +131,21 @@ public class MKTBranchAndBound implements Solver {
         Casilla casillaActual = new Casilla(map.getINIT_ROW(), map.getINIT_COLUMN());
 
         actualMove = x.getMove(i);
-        Casilla.avanza(casillaActual, actualMove);
+
+        clearMap();
 
 
         do {
-
+            Casilla.avanza(casillaActual, actualMove);
             if (casillaActual.getColumn() < 0 || casillaActual.getColumn() > map.columns() - 1
                     || casillaActual.getRow() < 0 || casillaActual.getRow() > map.rows() - 1) {
                 return false;
             }
 
             if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof WallCasilla)
+                return false;
+
+            if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof EntryCasilla)
                 return false;
 
 
@@ -160,7 +158,6 @@ public class MKTBranchAndBound implements Solver {
 
             i++;
             actualMove = x.getMove(i);
-            Casilla.avanza(casillaActual, actualMove);
         } while(actualMove != -1);
 
         if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof TreasureCasilla){
@@ -226,7 +223,7 @@ public class MKTBranchAndBound implements Solver {
      * @return true Si el valor s1 es mejor que s2
      */
     private boolean mejorCamino(SolutionValue s1, SolutionValue s2){
-        return (s1.getPathLength() < s2.getPathLength() && s1.getKeys() < s2.getKeys());
+        return (s1.getKeys() <= s2.getKeys() && s1.getPathLength() < s2.getPathLength());
     }
 
 
