@@ -12,10 +12,10 @@ public class Casilla {
     protected int column;
 
     /**
-     *
-     * @param qKeys
-     * @param row
-     * @param column
+     * Construye un objeto casilla de mapa
+     * @param qKeys Llaves que contiene
+     * @param row Fila en la que esta situada
+     * @param column Columna en la que esta situada
      */
     public Casilla(int qKeys, int row, int column) {
         this.qKeys = qKeys;

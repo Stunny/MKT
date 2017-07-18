@@ -1,7 +1,5 @@
 package model;
 
-import model.map.Map;
-
 /**
  * Nodo de branch and bound que incluye marcage para la configuracion que almacena
  * Created by avoge on 17/07/2017.

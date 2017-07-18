@@ -6,16 +6,19 @@ package model;
  */
 public interface Solver {
 
-    String SOLVE_BT = "BTSM";
-    String SOLVE_IMPBT = "BTAM";
-    String SOLVE_BB = "BBSM";
-    String SOLVE_IMPBB = "BBAM";
-
-    int OUTPUT_BOTH = 0;
-    int OUTPUT_BEST = 1;
-
+    /**
+     * Solves the Labirynth problem
+     * @param x Configuration
+     * @param k Current search depth
+     */
     void solve(Configuration x, int k);
 
+    /**
+     * Solves the Labirynth problem with efficiency improvements
+     * @param x Configuration
+     * @param k Current search depth
+     * @param m Mark
+     */
     void improvedSolve(Configuration x, int k, Mark m);
 
 }
