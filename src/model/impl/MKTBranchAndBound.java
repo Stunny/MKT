@@ -80,9 +80,13 @@ public class MKTBranchAndBound implements Solver {
 
         while(!aliveNodes.isEmpty()){
             actualNode = aliveNodes.poll();
+            preparePath(actualNode.getConfiguration(), actualNode.getK());
+
             children = expand(actualNode);
 
             for(Configuration child : children){
+
+                addToPath(child, actualNode.getK());
 
                 if(buena(child)){
                     if(solucion(child) && mejorCamino(valor(child), vMillor)){
@@ -103,8 +107,11 @@ public class MKTBranchAndBound implements Solver {
 
                 }
 
+                removeFromPath(child, actualNode.getK());
                 clearMap();
             }
+
+            progressGUI.deletePath();
         }
     }
 
@@ -236,6 +243,90 @@ public class MKTBranchAndBound implements Solver {
         return (s1.getKeys() <= s2.getKeys() && s1.getPathLength() < s2.getPathLength());
     }
 
+    /**
+     * Añade la siguiente casilla al camino de la vista
+     * @param x Configuracion estudiada en el momento
+     */
+    private void addToPath(Configuration x, int k){
+
+        Casilla casillaActual = new Casilla(map.getINIT_ROW(), map.getINIT_COLUMN());
+        int llaves = 0;
+
+        for(int i = 0; i <= k; i++){
+            Casilla.avanza(casillaActual, x.getMove(i));
+
+            if (!(casillaActual.getColumn() < 0 || casillaActual.getColumn() > map.columns() - 1
+                    || casillaActual.getRow() < 0 || casillaActual.getRow() > map.rows() - 1))
+                llaves += map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getqKeys();
+
+        }
+
+        if (!(casillaActual.getColumn() < 0 || casillaActual.getColumn() > map.columns() - 1
+                || casillaActual.getRow() < 0 || casillaActual.getRow() > map.rows() - 1))
+            if (!(map.getCasilla(casillaActual.getRow(), casillaActual.getColumn())
+                    instanceof WallCasilla)) {
+                progressGUI.addToPath(casillaActual.getRow(), casillaActual.getColumn());
+            }
+        progressGUI.setKeysCollected(llaves);
+        progressGUI.setPathLength(k+1);
+    }
+
+    /**
+     * Prepara el camino del mapa para el estudio de una configuracion actual
+     * @param x Configuracion
+     * @param k Longitud del camino
+     */
+    private void preparePath(Configuration x, int k){
+        Casilla casillaActual = new Casilla(map.getINIT_ROW(), map.getINIT_COLUMN());
+        int llaves = 0;
+
+        for(int i = 0; i <= k; i++) {
+            Casilla.avanza(casillaActual, x.getMove(i));
+            llaves += map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getqKeys();
+            if (!(casillaActual.getColumn() < 0 || casillaActual.getColumn() > map.columns() - 1
+                    || casillaActual.getRow() < 0 || casillaActual.getRow() > map.rows() - 1))
+                if (!(map.getCasilla(casillaActual.getRow(), casillaActual.getColumn())
+                        instanceof WallCasilla)) {
+                    progressGUI.addToPath(casillaActual.getRow(), casillaActual.getColumn());
+                }
+        }
+
+        progressGUI.setPathLength(k+1);
+        progressGUI.setKeysCollected(llaves);
+    }
+
+    /**
+     * Actualiza la vista, retrocediendo el camino, conforme a la configuracion actual
+     * @param x Configuracion actual
+     * @param k Nivel de busqueda actual
+     */
+    private void removeFromPath(Configuration x, int k){
+        Casilla casillaActual = new Casilla(map.getINIT_ROW(), map.getINIT_COLUMN());
+        int llaves = 0;
+
+        for(int i = 0; i <= k; i++){
+            Casilla.avanza(casillaActual, x.getMove(i));
+            if (!(casillaActual.getColumn() < 0 || casillaActual.getColumn() > map.columns() - 1
+                    || casillaActual.getRow() < 0 || casillaActual.getRow() > map.rows() - 1))
+                if (!(map.getCasilla(casillaActual.getRow(), casillaActual.getColumn())
+                        instanceof WallCasilla)) {
+                    llaves += map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getqKeys();
+                }
+        }
+        if (!(casillaActual.getColumn() < 0 || casillaActual.getColumn() > map.columns() - 1
+                || casillaActual.getRow() < 0 || casillaActual.getRow() > map.rows() - 1))
+            if (!(map.getCasilla(casillaActual.getRow(), casillaActual.getColumn())
+                    instanceof WallCasilla)) {
+                llaves -= map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getqKeys();
+                progressGUI.deleteFromPath(casillaActual.getRow(), casillaActual.getColumn());
+            }
+
+        progressGUI.setKeysCollected(llaves);
+        progressGUI.setPathLength(k+1);
+
+
+    }
+
     //**************************************************************************************************************//
 
     @Override
@@ -271,6 +362,7 @@ public class MKTBranchAndBound implements Solver {
 
             actualNode = aliveNodes.poll();
             children = expand(actualNode);
+            preparePath(actualNode.getConfiguration(), actualNode.getK());
 
             for(BBMarkedNode child : children){
 
@@ -278,7 +370,7 @@ public class MKTBranchAndBound implements Solver {
                 childM = child.getMark();
 
                 if(buena(childX, childM)){
-
+                    addToPath(childM);
                     if(solucion(childM) && mejorCamino(valor(childM), vMillor)){
                         System.out.println("SOLUCION");
                         vMillor = valor(childM);
@@ -296,9 +388,11 @@ public class MKTBranchAndBound implements Solver {
                     }else if(mejorCamino(valor(childM), vMillor)){
                         aliveNodes.add(new BBMarkedNode(childX, child.getK(), valor(childM), childM));
                     }
-
+                    removeFromPath(childM);
                 }
             }
+
+            progressGUI.deletePath();
         }
     }
 
@@ -397,5 +491,27 @@ public class MKTBranchAndBound implements Solver {
      */
     private SolutionValue valor(Mark m){
         return new SolutionValue(m.getPathLength(), m.getCurrentKeys());
+    }
+
+    /**
+     * Actualiza la vista conforme al marcage actual
+     * @param mark Marcage actual
+     */
+    private void addToPath(Mark mark){
+
+        Casilla actual = mark.getCasillaActual();
+        progressGUI.addToPath(actual.getRow(), actual.getColumn());
+        progressGUI.setKeysCollected(mark.getCurrentKeys());
+        progressGUI.setPathLength(mark.getPathLength());
+    }
+
+    /**
+     * Actualiza la vista, retrocediendo el camino, conforme al marcage actual
+     * @param m Marcage actual
+     */
+    private void removeFromPath(Mark m){
+        progressGUI.deleteFromPath(m.getCasillaActual().getRow(), m.getCasillaActual().getColumn());
+        progressGUI.setPathLength(m.getPathLength());
+        progressGUI.setKeysCollected(m.getCurrentKeys());
     }
 }

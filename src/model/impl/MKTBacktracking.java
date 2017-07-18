@@ -328,9 +328,9 @@ public class MKTBacktracking implements Solver {
             llaves += map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()).getqKeys();
         }
 
-        //casillaActual.step();
         gui.addToPath(casillaActual.getRow(), casillaActual.getColumn());
         gui.setPathLength(k+1);
+        gui.setKeysCollected(llaves);
     }
 
     /**
