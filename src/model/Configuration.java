@@ -1,6 +1,7 @@
 package model;
 
 /**
+ * Representa una configuracion sobre la que se construye una solucion al problema del laberinto
  * Created by Alex on 08/04/2017.
  */
 public class Configuration {

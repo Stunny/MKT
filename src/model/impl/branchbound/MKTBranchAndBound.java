@@ -1,6 +1,7 @@
-package model.impl;
+package model.impl.branchbound;
 
 import model.*;
+import model.Mark;
 import model.map.*;
 import view.SolutionGUIBuilder;
 import view.MultiKeyTreasureGUI;

@@ -109,9 +109,9 @@ public class Casilla {
     public int getSteps(){return steps;}
 
     /**
-     *
-     * @param casillaActual
-     * @param move
+     * Avanza las coordenadas de cierta casilla segun el movimiento especificado
+     * @param casillaActual Casilla que se desea avanzar
+     * @param move Movimiento que indica la direccion del avance
      */
     public static void avanza(Casilla casillaActual, int move){
         switch(move){
@@ -131,9 +131,9 @@ public class Casilla {
     }
 
     /**
-     *
-     * @param casillaActual
-     * @param move
+     * Retrocede una casilla a las coordenadas anteriores a hacer el movimiento indicado
+     * @param casillaActual Casilla que se desea retroceder
+     * @param move Movimiento a deshacer
      */
     public static void retrocede(Casilla casillaActual, int move){
         switch(move){

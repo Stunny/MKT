@@ -1,4 +1,8 @@
-package model;
+package model.impl.branchbound;
+
+import model.Configuration;
+import model.SolutionValue;
+import model.Mark;
 
 /**
  * Nodo de branch and bound que incluye marcage para la configuracion que almacena

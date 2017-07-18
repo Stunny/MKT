@@ -1,4 +1,4 @@
-package model.impl;
+package model.impl.backtracking;
 
 import model.Configuration;
 import model.Mark;

@@ -1,10 +1,10 @@
 package model;
 
-import model.impl.MKTBacktracking;
 import model.map.Casilla;
 import model.map.Map;
 
 /**
+ * Marcage de configuracion del problema del laberinto
  * Created by Alex on 08/04/2017.
  */
 public class Mark {

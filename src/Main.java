@@ -1,8 +1,8 @@
 import model.Configuration;
 import model.Mark;
 import model.Solver;
-import model.impl.MKTBacktracking;
-import model.impl.MKTBranchAndBound;
+import model.impl.backtracking.MKTBacktracking;
+import model.impl.branchbound.MKTBranchAndBound;
 import model.map.Map;
 import view.MultiKeyTreasureGUI;
 
