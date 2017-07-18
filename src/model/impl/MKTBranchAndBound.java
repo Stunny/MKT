@@ -256,12 +256,11 @@ public class MKTBranchAndBound implements Solver {
         Mark childM;
 
         while(!aliveNodes.isEmpty()){
-            //System.out.println(aliveNodes.size());
+
             actualNode = aliveNodes.poll();
             children = expand(actualNode);
 
             for(BBMarkedNode child : children){
-                //try{Thread.sleep(10);}catch(InterruptedException e){}
 
                 childX = child.getConfiguration();
                 childM = child.getMark();
@@ -347,7 +346,7 @@ public class MKTBranchAndBound implements Solver {
         if (map.getCasilla(casillaActual.getRow(), casillaActual.getColumn()) instanceof EntryCasilla)
             return false;
 
-        if(m.getCasillaActual().getSteps() == 1){
+        if(m.getMap().getCasilla(m.getCasillaActual().getRow(), m.getCasillaActual().getColumn()).getSteps() > 1){
             return false;
         }
 
