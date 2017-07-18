@@ -15,6 +15,7 @@ public class Main {
 
         Map m = new Map(args[0]);
         MultiKeyTreasureGUI progressGUI = new MultiKeyTreasureGUI(500, 500, "MKT", m.getRawMap());
+        progressGUI.setVisible(Integer.parseInt(args[2]) == 0);
 
         System.out.println("CASILLA INICIAL: "+m.getINIT_COLUMN()+","+m.getINIT_ROW());
 

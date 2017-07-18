@@ -2,7 +2,7 @@ package model.impl;
 
 import model.*;
 import model.map.*;
-import model.utils.SolutionGUIBuilder;
+import view.SolutionGUIBuilder;
 import view.MultiKeyTreasureGUI;
 
 import java.util.PriorityQueue;
@@ -35,6 +35,8 @@ public class MKTBranchAndBound implements Solver {
      */
     private Configuration xMillor;
 
+    private long startingTime;
+
     /**
      * Construye un solucionador del laberinto que utiliza un algoritmo de tipo Ramificacion y Poda
      * @param m
@@ -53,6 +55,8 @@ public class MKTBranchAndBound implements Solver {
     public void solve(Configuration y, int k) {
 
         SolutionGUIBuilder bestSolutionGUIbuilder = new SolutionGUIBuilder(map);
+        startingTime = System.nanoTime();
+
         bestSolutionGUIbuilder.setValue(vMillor);
         bestSolutionGUIbuilder.setSolution(xMillor);
 
@@ -86,12 +90,11 @@ public class MKTBranchAndBound implements Solver {
                         vMillor = valor(child);
                         xMillor = child;
 
-                        if(bestSolutionGUIbuilder.isAlive()) bestSolutionGUIbuilder.interrupt();
                         bestSolutionGUIbuilder.clear();
-                        bestSolutionGUIbuilder = new SolutionGUIBuilder(map);
 
                         bestSolutionGUIbuilder.setSolution(xMillor);
                         bestSolutionGUIbuilder.setValue(vMillor);
+                        bestSolutionGUIbuilder.setElapsedTime(System.nanoTime()-startingTime);
                         bestSolutionGUIbuilder.start();
 
                     }else if(mejorCamino(valor(child), vMillor)){
@@ -241,6 +244,7 @@ public class MKTBranchAndBound implements Solver {
         SolutionGUIBuilder bestSolutionGUIbuilder = new SolutionGUIBuilder(map);
         bestSolutionGUIbuilder.setValue(vMillor);
         bestSolutionGUIbuilder.setSolution(xMillor);
+        startingTime = System.nanoTime();
 
         Configuration x = new Configuration(y);
         BBMarkedNode[] children;
@@ -282,12 +286,11 @@ public class MKTBranchAndBound implements Solver {
 
                         System.out.println(childM.getCurrentKeys());
 
-                        if(bestSolutionGUIbuilder.isAlive()) bestSolutionGUIbuilder.interrupt();
                         bestSolutionGUIbuilder.clear();
-                        bestSolutionGUIbuilder = new SolutionGUIBuilder(map);
 
                         bestSolutionGUIbuilder.setSolution(xMillor);
                         bestSolutionGUIbuilder.setValue(vMillor);
+                        bestSolutionGUIbuilder.setElapsedTime(System.nanoTime()-startingTime);
                         bestSolutionGUIbuilder.start();
 
                     }else if(mejorCamino(valor(childM), vMillor)){

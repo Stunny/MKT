@@ -1,17 +1,18 @@
-package model.utils;
+package view;
 
 import model.Configuration;
 import model.SolutionValue;
 import model.map.Casilla;
 import model.map.Map;
-import view.MultiKeyTreasureGUI;
 
 import javax.swing.*;
+import java.text.DecimalFormat;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Alex on 12/07/2017.
  */
-public class SolutionGUIBuilder extends Thread {
+public class SolutionGUIBuilder{
 
     private Configuration solution;
 
@@ -19,11 +20,17 @@ public class SolutionGUIBuilder extends Thread {
 
     private SolutionValue value;
 
-    private double time;
+    private long elapsedTime;
 
     MultiKeyTreasureGUI solutionGui;
 
+    private DecimalFormat formatter2D;
+    private DecimalFormat formatter3D;
+
     public SolutionGUIBuilder(Map m){
+
+        formatter2D = new DecimalFormat("00");
+        formatter3D = new DecimalFormat("000");
 
         this.map = m;
 
@@ -33,7 +40,7 @@ public class SolutionGUIBuilder extends Thread {
 
     }
 
-    public void run(){
+    public void start(){
 
         int i = 0;
 
@@ -50,12 +57,15 @@ public class SolutionGUIBuilder extends Thread {
 
         solutionGui.setPathLength(value.getPathLength());
         solutionGui.setKeysCollected(value.getKeys());
+        solutionGui.setElapsedTime(formatter2D.format(TimeUnit.NANOSECONDS.toHours(elapsedTime) % 24) + ":" +
+                formatter2D.format(TimeUnit.NANOSECONDS.toMinutes(elapsedTime) % 60) + ":" +
+                formatter2D.format(TimeUnit.NANOSECONDS.toSeconds(elapsedTime) % 60) +"." +
+                formatter3D.format(TimeUnit.NANOSECONDS.toMillis(elapsedTime) % 1000));
 
     }
 
-    public void clear(){
-        if(solutionGui != null)
-            solutionGui.dispose();
+    public synchronized void clear(){
+        solutionGui.deletePath();
     }
 
     public void setSolution(Configuration solution) {
@@ -64,5 +74,13 @@ public class SolutionGUIBuilder extends Thread {
 
     public void setValue(SolutionValue value) {
         this.value = new SolutionValue(value);
+    }
+
+    public long getElapsedTime() {
+        return elapsedTime;
+    }
+
+    public void setElapsedTime(long elapsedTime) {
+        this.elapsedTime = elapsedTime;
     }
 }

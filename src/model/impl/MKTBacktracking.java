@@ -5,6 +5,7 @@ import model.Mark;
 import model.SolutionValue;
 import model.Solver;
 import model.map.*;
+import view.SolutionGUIBuilder;
 import view.MultiKeyTreasureGUI;
 
 /**
@@ -35,6 +36,9 @@ public class MKTBacktracking implements Solver {
      */
     private SolutionValue vMillor;
 
+    private SolutionGUIBuilder solutionGUIBuilder;
+    private long startingTime;
+
     /**
      * Creates a new Labirynth solver that uses Backtracking as the serch method
      * @param map Labirynth map
@@ -44,6 +48,9 @@ public class MKTBacktracking implements Solver {
         this.gui = gui;
         xMillor = new Configuration(map.rows()*map.columns());
         vMillor = new SolutionValue(Integer.MAX_VALUE, Integer.MAX_VALUE);
+
+        solutionGUIBuilder = new SolutionGUIBuilder(map);
+        startingTime = System.nanoTime();
     }
 
     @Override
@@ -83,6 +90,7 @@ public class MKTBacktracking implements Solver {
     public void improvedSolve(Configuration y, int k, Mark n) {
 
         Configuration x = new Configuration(y);
+        startingTime = System.nanoTime();
         Mark m = new Mark(n, map);
 
         preparaRecorridoNivel(x, k, m);
@@ -94,7 +102,7 @@ public class MKTBacktracking implements Solver {
             siguienteHermano(x, k);
             m.mark(x, k);
 
-            if(m.getPathLength() < vMillor.getPathLength() && m.getCurrentKeys() < vMillor.getKeys()){
+            if(m.getPathLength() < vMillor.getPathLength() && m.getCurrentKeys() <= vMillor.getKeys()){
                 if(buena(x, k, m)){
                     if(solucion(x, k, m)){
                         tratarSolucion(x, m);
@@ -266,11 +274,18 @@ public class MKTBacktracking implements Solver {
             );
         }
 
-        if(vActual.getKeys() >= vMillor.getKeys()) return;
+        if(vActual.getKeys() >= vMillor.getKeys() && vActual.getPathLength() >= vMillor.getPathLength()) return;
 
         if(vActual.getKeys() >= map.getReqKeys()){
             xMillor = new Configuration(x);
             vMillor = new SolutionValue(vActual);
+
+            solutionGUIBuilder.clear();
+            solutionGUIBuilder.setSolution(x);
+            solutionGUIBuilder.setValue(vMillor);
+            solutionGUIBuilder.setElapsedTime(System.nanoTime()-startingTime);
+
+            solutionGUIBuilder.start();
         }
 
     }
@@ -281,9 +296,22 @@ public class MKTBacktracking implements Solver {
     private void tratarSolucion(Configuration x, Mark m){
         System.out.println("SOLUCION");
 
-        xMillor = new Configuration(x);
-        vMillor.setKeys(m.getCurrentKeys());
-        vMillor.setPathLength(m.getPathLength());
+        SolutionValue vActual = new SolutionValue(m.getPathLength(), m.getCurrentKeys());
+
+        if(vActual.getKeys() >= vMillor.getKeys() && vActual.getPathLength() >= vMillor.getPathLength())
+            return;
+
+        if(vActual.getKeys() >= map.getReqKeys()){
+            xMillor = new Configuration(x);
+            vMillor = new SolutionValue(vActual);
+
+            solutionGUIBuilder.clear();
+            solutionGUIBuilder.setSolution(x);
+            solutionGUIBuilder.setValue(vMillor);
+            solutionGUIBuilder.setElapsedTime(System.nanoTime()-startingTime);
+
+            solutionGUIBuilder.start();
+        }
     }
 
     /**
