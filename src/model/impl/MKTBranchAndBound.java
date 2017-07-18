@@ -8,7 +8,10 @@ import view.MultiKeyTreasureGUI;
 import java.util.PriorityQueue;
 
 /**
- * Created by Alex on 08/04/2017.
+ * Clase que implementa un solucionador del laberinto mediante el algoritmo de Ramificacion y Poda
+ * @author Alex Vogel
+ * @version 1.0 07/2017
+ * @see model.Solver
  */
 public class MKTBranchAndBound implements Solver {
 
@@ -32,6 +35,11 @@ public class MKTBranchAndBound implements Solver {
      */
     private Configuration xMillor;
 
+    /**
+     * Construye un solucionador del laberinto que utiliza un algoritmo de tipo Ramificacion y Poda
+     * @param m
+     * @param gui
+     */
     public MKTBranchAndBound(Map m, MultiKeyTreasureGUI gui){
         this.map = m;
         this.progressGUI = gui;
@@ -291,6 +299,10 @@ public class MKTBranchAndBound implements Solver {
         }
     }
 
+    /**
+     * Retorna las cuatro configuraciones hijas de la especificada
+     * @param node Nodo de configuracion padre
+     */
     private BBMarkedNode[] expand(BBMarkedNode node){
 
         int k = node.getK();
@@ -331,6 +343,13 @@ public class MKTBranchAndBound implements Solver {
         };
     }
 
+    /**
+     * Comprueba si una configuracion es solucion factible o configuracion completable mediante una estructura de
+     * marcage
+     * @param x Configuracion
+     * @param m Marcage de la configuracion
+     * @return true si es factible o completable
+     */
     private boolean buena(Configuration x, Mark m){
 
         Casilla casillaActual = m.getCasillaActual();
@@ -358,11 +377,21 @@ public class MKTBranchAndBound implements Solver {
 
     }
 
+    /**
+     * Comprueba si una solucion se encuentra en estado de ser solucion mediante su marcage
+     * @param m Marcage de la configuracion
+     * @return true si es una configuracion solucion
+     */
     private boolean solucion(Mark m){
         return map.getCasilla(m.getCasillaActual().getRow(), m.getCasillaActual().getColumn())
                 instanceof TreasureCasilla && m.getCurrentKeys() >= map.getReqKeys();
     }
 
+    /**
+     * Evalua el valor parcial o total de una configuracion mediante su marcage
+     * @param m Marcage de la configuracion
+     * @return El valor de la configuracion
+     */
     private SolutionValue valor(Mark m){
         return new SolutionValue(m.getPathLength(), m.getCurrentKeys());
     }
