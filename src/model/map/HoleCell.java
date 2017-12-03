@@ -3,9 +3,9 @@ package model.map;
 /**
  * Created by avoge on 17/12/2016.
  */
-public class TreasureCasilla extends Casilla {
+public class HoleCell extends Cell {
 
-    public TreasureCasilla(int row, int column){
+    public HoleCell(int row, int column){
         super(row, column);
     }
 

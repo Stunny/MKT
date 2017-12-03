@@ -2,6 +2,8 @@ package model.map;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -14,18 +16,15 @@ public class Map {
     public static final int MOVE_DOWN = 2;
     public static final int MOVE_RIGHT = 3;
 
-    private int INIT_ROW;
-    private int INIT_COLUMN;
+    private Cell[][] field;
 
-    private int reqKeys;
-
-    private Casilla[][] laberinto;
+    private List ballCells;
 
     private String[][] rawMap;
 
-    public Map(String fileRoute) {
+    public Map() {
 
-        File mapFile = new File(fileRoute);
+        File mapFile = new File("map.txt");
 
         Scanner fileScanner;
 
@@ -36,9 +35,7 @@ public class Map {
             return;
         }
 
-        reqKeys = fileScanner.nextInt();
-
-        int filas = 1, columnas;
+        int filas = fileScanner.nextInt(), columnas;
         String line;
 
         fileScanner.nextLine();
@@ -50,8 +47,9 @@ public class Map {
             filas++;
         }
 
-        laberinto = new Casilla[filas][columnas];
+        field = new Cell[filas][columnas];
         rawMap = new String[filas][columnas];
+        ballCells = new ArrayList();
         fileScanner.close();
 
         try {
@@ -61,30 +59,29 @@ public class Map {
         fileScanner.nextLine();
 
         char aux;
-        int keysIn;
+        int numHits;
 
-        for(int i = 0; i < laberinto.length; i++){
+        for(int i = 0; i < field.length && fileScanner.hasNextLine(); i++){
             line = fileScanner.nextLine();
-
+            System.out.println(line);
             for(int j = 0; j < columnas; j++){
 
                 aux = line.charAt(j);
                 rawMap[i][j] = Character.toString(aux);
                 switch (aux){
-                    case 'E':
-                        laberinto[i][j] = new EntryCasilla(i, j);
-                        INIT_ROW = i;
-                        INIT_COLUMN = j;
+                    case '.':
+                        field[i][j] = new Cell(i, j);
                         break;
-                    case 'T':
-                        laberinto[i][j] = new TreasureCasilla(i, j);
+                    case 'H':
+                        field[i][j] = new HoleCell(i, j);
                         break;
-                    case '-':
-                        laberinto[i][j] = new WallCasilla(i, j);
+                    case 'X':
+                        field[i][j] = new WaterCell(i, j);
                         break;
                     default:
-                        keysIn = Character.getNumericValue(aux);
-                        laberinto[i][j] = new Casilla(keysIn, i, j);
+                        numHits = Character.getNumericValue(aux);
+                        field[i][j] = new BallCell(i, j, numHits);
+                        ballCells.add(field[i][j]);
                 }
 
             }
@@ -93,25 +90,22 @@ public class Map {
 
     public Map(Map map){
         this.rawMap = map.getRawMap();
-        this.INIT_ROW = map.getINIT_ROW();
-        this.INIT_COLUMN = map.getINIT_COLUMN();
-        this.reqKeys = map.getReqKeys();
 
-        laberinto = new Casilla[map.rows()][map.columns()];
+        field = new Cell[map.rows()][map.columns()];
         for(int i = 0; i < map.rows(); i++)
             for(int j = 0; j < map.columns(); j++){
 
-            laberinto[i][j] = new Casilla(map.getCasilla(i, j).getqKeys(), i, j);
-            laberinto[i][j].setSteps(map.getCasilla(i, j).getSteps());
+            field[i][j] = new Cell(i, j);
+            field[i][j].setSteps(map.getCell(i, j).getSteps());
 
             }
     }
 
-    public Casilla getCasilla(int row, int column){
+    public Cell getCell(int row, int column){
 
-        Casilla aux = null;
+        Cell aux = null;
         try{
-            aux = laberinto[row][column];
+            aux = field[row][column];
         }catch (IndexOutOfBoundsException e){
             System.err.println("Tas salio del mapa");
         }
@@ -119,32 +113,21 @@ public class Map {
         return aux;
     }
 
+    public List getBallCells() {
+        return ballCells;
+    }
+
     public int rows(){
-        return laberinto.length;
+        return field.length;
     }
 
     public  int columns(){
-        return laberinto[0].length;
+        return field[0].length;
     }
 
-    public int getReqKeys() {
-        return reqKeys;
-    }
-
-    public void setReqKeys(int reqKeys) {
-        this.reqKeys = reqKeys;
-    }
-
-    public int getINIT_ROW() {
-        return INIT_ROW;
-    }
-
-    public int getINIT_COLUMN() {
-        return INIT_COLUMN;
-    }
 
     /**
-     * Retorna la representacion del mapa del laberinto en caracteres.
+     * Retorna la representacion del mapa del field en caracteres.
      * @return Matriz de Strings en la que cada posicion es una casilla
      */
     public String[][] getRawMap(){

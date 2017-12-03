@@ -6,12 +6,6 @@ package model;
  */
 public interface Solver {
 
-    /**
-     * Solves the Labirynth problem
-     * @param x Configuration
-     * @param k Current search depth
-     */
-    void solve(Configuration x, int k);
 
     /**
      * Solves the Labirynth problem with efficiency improvements
@@ -19,6 +13,6 @@ public interface Solver {
      * @param k Current search depth
      * @param m Mark
      */
-    void improvedSolve(Configuration x, int k, Mark m);
+    void solve(Configuration x, int k, Mark m);
 
 }

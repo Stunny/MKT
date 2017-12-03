@@ -3,33 +3,20 @@ package model.map;
 /**
  * Created by avoge on 08/12/2016.
  */
-public class Casilla {
+public class Cell {
 
-    protected int qKeys;
     protected int steps;
 
     protected int row;
     protected int column;
 
-    /**
-     * Construye un objeto casilla de mapa
-     * @param qKeys Llaves que contiene
-     * @param row Fila en la que esta situada
-     * @param column Columna en la que esta situada
-     */
-    public Casilla(int qKeys, int row, int column) {
-        this.qKeys = qKeys;
-        this.row = row;
-        this.column = column;
-        steps = 0;
-    }
 
     /**
      *
      * @param row
      * @param column
      */
-    public Casilla(int row, int column) {
+    public Cell(int row, int column) {
         this.row = row;
         this.column = column;
         steps = 0;
@@ -39,19 +26,10 @@ public class Casilla {
      *
      * @param c
      */
-    public Casilla(Casilla c){
-        this.qKeys = c.getqKeys();
+    public Cell(Cell c){
         this.row = c.getRow();
         this.column = c.getColumn();
         this.steps = c.getSteps();
-    }
-
-    /**
-     *
-     * @return
-     */
-    public int getqKeys() {
-        return qKeys;
     }
 
     /**
@@ -110,44 +88,44 @@ public class Casilla {
 
     /**
      * Avanza las coordenadas de cierta casilla segun el movimiento especificado
-     * @param casillaActual Casilla que se desea avanzar
+     * @param cellActual Cell que se desea avanzar
      * @param move Movimiento que indica la direccion del avance
      */
-    public static void avanza(Casilla casillaActual, int move){
+    public static void mvForward(Cell cellActual, int move){
         switch(move){
             case Map.MOVE_UP:
-                casillaActual.setRow(casillaActual.getRow()-1);
+                cellActual.setRow(cellActual.getRow()-1);
                 break;
             case Map.MOVE_LEFT:
-                casillaActual.setColumn(casillaActual.getColumn()-1);
+                cellActual.setColumn(cellActual.getColumn()-1);
                 break;
             case Map.MOVE_DOWN:
-                casillaActual.setRow(casillaActual.getRow()+1);
+                cellActual.setRow(cellActual.getRow()+1);
                 break;
             case Map.MOVE_RIGHT:
-                casillaActual.setColumn(casillaActual.getColumn()+1);
+                cellActual.setColumn(cellActual.getColumn()+1);
                 break;
         }
     }
 
     /**
      * Retrocede una casilla a las coordenadas anteriores a hacer el movimiento indicado
-     * @param casillaActual Casilla que se desea retroceder
+     * @param cellActual Cell que se desea retroceder
      * @param move Movimiento a deshacer
      */
-    public static void retrocede(Casilla casillaActual, int move){
+    public static void mvBackwards(Cell cellActual, int move){
         switch(move){
             case Map.MOVE_UP:
-                casillaActual.setRow(casillaActual.getRow()+1);
+                cellActual.setRow(cellActual.getRow()+1);
                 break;
             case Map.MOVE_LEFT:
-                casillaActual.setColumn(casillaActual.getColumn()+1);
+                cellActual.setColumn(cellActual.getColumn()+1);
                 break;
             case Map.MOVE_DOWN:
-                casillaActual.setRow(casillaActual.getRow()-1);
+                cellActual.setRow(cellActual.getRow()-1);
                 break;
             case Map.MOVE_RIGHT:
-                casillaActual.setColumn(casillaActual.getColumn()-1);
+                cellActual.setColumn(cellActual.getColumn()-1);
                 break;
         }
     }

@@ -6,29 +6,34 @@ package model;
  */
 public class Configuration {
 
-    private int[] moves;
+    private char[][] moves;
 
-    public Configuration(int maxMoves) {
-        moves = new int[maxMoves];
-        for(int i = 0; i < maxMoves; i++) moves[i] = -1;
+    public Configuration(int height, int width) {
+        moves = new char[height][width];
+        for(int i = 0; i < width; i++)
+            for(int j = 0; j < height; j++)
+                moves[i][j] = '.';
     }
 
     public Configuration(Configuration x){
-        moves = new int[x.getLength()];
+        moves = new char[x.getHeight()][x.getWidth()];
 
-        for(int i = 0; i < x.getLength(); i++)
-            moves[i] = x.getMove(i);
+        for(int i = 0; i < x.getWidth(); i++)
+            for(int j = 0; j < x.getHeight(); j++)
+                moves[i][j] = x.getMove(i, j);
     }
 
-    public int getMove(int k) throws IndexOutOfBoundsException{
-        return moves[k];
+    public char getMove(int i, int j) throws IndexOutOfBoundsException{
+        return moves[i][j];
     }
 
-    public void setMove(int k, int move) throws IndexOutOfBoundsException{
-        moves[k] = move;
+    public void setMove(int i, int j, char move) throws IndexOutOfBoundsException{
+        moves[i][j] = move;
     }
 
-    public int getLength(){
+    public int getWidth(){
         return moves.length;
     }
+
+    public int getHeight(){ return moves[0].length;}
 }
